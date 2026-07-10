@@ -1,9 +1,9 @@
 import { MechanismArtFrame, MECH_COLORS } from "./MechanismArtFrame";
 
 /**
- * תרשים תהודה (Resonance) - יון קרבוקסילט (RCOO⁻).
+ * תרשים רזוננס (Resonance) - יון קרבוקסילט (RCOO⁻).
  * חשוב: זו לא תגובה של מגיבים→תוצרים! זו אותה מולקולה בדיוק, מתוארת בשני מבני
- * לואיס שונים (מבני תהודה) המחוברים בחץ תהודה דו-ראשי (↔), לא בחץ תגובה חד-כיווני.
+ * לואיס שונים (מבני רזוננס) המחוברים בחץ רזוננס דו-ראשי (↔), לא בחץ תגובה חד-כיווני.
  * פאנל 1 (עם 2 חצים מקווקווים) מראה כיצד "עוברים" למבנה 2: זוג בודד על ה-O⁻
  * הופך לקשר פי חדש, ובמקביל קשר הפי הקיים C=O הופך לזוג בודד על החמצן השני.
  */
@@ -12,8 +12,8 @@ export function ResonanceArt() {
 
   return (
     <MechanismArtFrame
-      title="תהודה של קרבוקסילט - שני מבני תהודה שקולים"
-      note="שימו לב: זו לא תגובה כימית! זו אותה מולקולה בדיוק (יון קרבוקסילט) - רק מיקום האטומים קבוע, ומה שמשתנה בין שני הציורים הוא מיקום האלקטרונים בלבד. חץ התהודה (↔, ראש כפול) מבטא זאת, בניגוד לחץ תגובה חד-כיווני. המבנה ה'אמיתי' של המולקולה הוא ההיברידיזציה של שני המבנים - המטען השלילי מפוזר שווה בשווה על שני החמצנים, ולכן קרבוקסילט יציב כל כך ולכן חומצה קרבוקסילית חומצית בהרבה יותר מאלכוהול מקביל."
+      title="רזוננס של קרבוקסילט - שני מבני רזוננס שקולים"
+      note="שימו לב: זו לא תגובה כימית! זו אותה מולקולה בדיוק (יון קרבוקסילט) - רק מיקום האטומים קבוע, ומה שמשתנה בין שני הציורים הוא מיקום האלקטרונים בלבד. חץ הרזוננס (↔, ראש כפול) מבטא זאת, בניגוד לחץ תגובה חד-כיווני. המבנה ה'אמיתי' של המולקולה הוא ההיברידיזציה של שני המבנים - המטען השלילי מפוזר שווה בשווה על שני החמצנים, ולכן קרבוקסילט יציב כל כך ולכן חומצה קרבוקסילית חומצית בהרבה יותר מאלכוהול מקביל."
     >
       <svg viewBox="0 0 760 230" className="w-full h-auto" style={{ minWidth: 620 }}>
         <defs>
@@ -22,7 +22,7 @@ export function ResonanceArt() {
           </marker>
         </defs>
 
-        {/* ---------- פאנל 1: מבנה תהודה א' (עם החצים המקווקווים) ---------- */}
+        {/* ---------- פאנל 1: מבנה רזוננס א' (עם החצים המקווקווים) ---------- */}
         <g fontFamily="inherit">
           {/* R - קשר לפחמן */}
           <line x1="60" y1="120" x2="126" y2="120" stroke={MECH_COLORS.bond} strokeWidth="2" />
@@ -52,16 +52,16 @@ export function ResonanceArt() {
           {/* חץ 2: מהקשר הכפול הקיים C=O אל אותו חמצן (הופך אותו ל-O⁻) */}
           <path d="M165,88 Q182,72 194,61" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-resonance)" />
 
-          <text x="130" y="215" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">מבנה תהודה א׳</text>
+          <text x="130" y="215" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">מבנה רזוננס א׳</text>
         </g>
 
-        {/* ---------- חץ תהודה דו-ראשי (↔) בין שני מבני התהודה ---------- */}
+        {/* ---------- חץ רזוננס דו-ראשי (↔) בין שני מבני הרזוננס ---------- */}
         <g>
           <line x1="250" y1="120" x2="505" y2="120" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerStart="url(#arrow-resonance)" markerEnd="url(#arrow-resonance)" />
-          <text x="377" y="105" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">תהודה (אותה מולקולה!)</text>
+          <text x="377" y="105" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">רזוננס (אותה מולקולה!)</text>
         </g>
 
-        {/* ---------- פאנל 2: מבנה תהודה ב' (שקול לחלוטין, ללא חצים) ---------- */}
+        {/* ---------- פאנל 2: מבנה רזוננס ב' (שקול לחלוטין, ללא חצים) ---------- */}
         <g fontFamily="inherit" transform={`translate(${OFFSET_X}, 0)`}>
           {/* R - קשר לפחמן */}
           <line x1="60" y1="120" x2="126" y2="120" stroke={MECH_COLORS.bond} strokeWidth="2" />
@@ -85,7 +85,7 @@ export function ResonanceArt() {
           <circle cx="188" cy="204" r="1.6" fill={MECH_COLORS.atom} />
           <circle cx="198" cy="204" r="1.6" fill={MECH_COLORS.atom} />
 
-          <text x="130" y="215" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">מבנה תהודה ב׳ (שקול לחלוטין)</text>
+          <text x="130" y="215" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">מבנה רזוננס ב׳ (שקול לחלוטין)</text>
         </g>
       </svg>
     </MechanismArtFrame>

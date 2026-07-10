@@ -1,5 +1,5 @@
 import { NucleophilicSubstitutionArt } from "./NucleophilicSubstitutionArt";
-import { StereochemistryArt } from "./StereochemistryArt";
+import { RadicalReactionsArt } from "./RadicalReactionsArt";
 import { EliminationArt } from "./EliminationArt";
 import { AlkeneAdditionArt } from "./AlkeneAdditionArt";
 import { AlcoholsThiolsArt } from "./AlcoholsThiolsArt";
@@ -11,9 +11,9 @@ import { AlphaCarbonArt } from "./AlphaCarbonArt";
 import { CycloalkanesCarbsRedoxArt } from "./CycloalkanesCarbsRedoxArt";
 import { ReactivityToolkitArt } from "./ReactivityToolkitArt";
 
-/** מיפוי slug של נושא → קומפוננטת תרשים מנגנון עם חצים (SVG). נומנקלטורה מכוונת בלי מנגנון. */
+/** מיפוי slug של נושא → קומפוננטת תרשים מנגנון עם חצים (SVG). נומנקלטורה וסטריאוכימיה מכוונות בלי מנגנון. */
 export const MECHANISM_ART: Record<string, React.ComponentType> = {
-  stereochemistry: StereochemistryArt,
+  "radical-reactions": RadicalReactionsArt,
   "nucleophilic-substitution": NucleophilicSubstitutionArt,
   "reactivity-toolkit": ReactivityToolkitArt,
   elimination: EliminationArt,

@@ -4,7 +4,7 @@ export function AlphaCarbonArt() {
   return (
     <MechanismArtFrame
       title="יצירת אנולט - הסרת מימן אלפא על ידי בסיס"
-      note="המימן האלפא חומצי יחסית (pKa~20) כי הבסיס המצומד (אנולט) מיוצב בתהודה - המטען השלילי מפוזר בין הפחמן לחמצן (כמו בקרבוקסילט, אבל פחות יציב כי חמצן אחד בלבד)."
+      note="המימן האלפא חומצי יחסית (pKa~20) כי הבסיס המצומד (אנולט) מיוצב ברזוננס - המטען השלילי מפוזר בין הפחמן לחמצן (כמו בקרבוקסילט, אבל פחות יציב כי חמצן אחד בלבד)."
     >
       <svg viewBox="0 0 720 235" className="w-full h-auto" style={{ minWidth: 560 }}>
         <defs>
@@ -95,7 +95,7 @@ export function AlphaCarbonArt() {
           <text x="668" y="182" fontSize="14" fill={MECH_COLORS.atom} textAnchor="middle">R'</text>
 
           <text x="560" y="207" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">תוצרים - אנולט</text>
-          <text x="560" y="222" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">(מיוצב בתהודה בין הפחמן לחמצן)</text>
+          <text x="560" y="222" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">(מיוצב ברזוננס בין הפחמן לחמצן)</text>
         </g>
       </svg>
     </MechanismArtFrame>

@@ -1,6 +1,6 @@
 import { MechanismArtFrame, MECH_COLORS } from "./MechanismArtFrame";
 
-export function StereochemistryArt() {
+export function RadicalReactionsArt() {
   return (
     <MechanismArtFrame
       title="מנגנון רדיקלי - הסטת מימן (Hydrogen Abstraction) בשלב ההתפשטות"

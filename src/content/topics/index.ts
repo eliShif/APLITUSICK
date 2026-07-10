@@ -1,6 +1,7 @@
 import type { Topic } from "@/content/types";
 import { nomenclature } from "./nomenclature";
 import { stereochemistry } from "./stereochemistry";
+import { radicalReactions } from "./radical-reactions";
 import { nucleophilicSubstitution } from "./nucleophilic-substitution";
 import { reactivityToolkit } from "./reactivity-toolkit";
 import { elimination } from "./elimination";
@@ -16,6 +17,7 @@ import { cycloalkanesCarbsRedox } from "./cycloalkanes-carbs-redox";
 export const topics: Topic[] = [
   nomenclature,
   stereochemistry,
+  radicalReactions,
   nucleophilicSubstitution,
   reactivityToolkit,
   elimination,
