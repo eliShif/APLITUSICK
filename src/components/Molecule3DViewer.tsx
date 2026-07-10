@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Molecule } from "@/content/types";
+import { SMILES_BY_CID } from "@/content/moleculeSmiles";
+import { MoleculeSkeletal } from "@/components/MoleculeSkeletal";
 
 type ViewerStyle = "stick" | "sphere" | "line";
 
@@ -16,6 +18,7 @@ interface GLViewerLike {
 }
 
 export function Molecule3DViewer({ molecule }: { molecule: Molecule }) {
+  const smiles = molecule.pubchemCid ? SMILES_BY_CID[molecule.pubchemCid] : undefined;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<GLViewerLike | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
@@ -83,11 +86,18 @@ export function Molecule3DViewer({ molecule }: { molecule: Molecule }) {
   return (
     <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900 overflow-hidden">
       <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-black/10 dark:border-white/10 text-sm">
-        <div className="font-semibold">
-          {molecule.name}
-          {molecule.formula && (
-            <span className="text-neutral-500 font-normal"> · {molecule.formula}</span>
+        <div className="flex min-w-0 items-center gap-2">
+          {smiles && (
+            <div className="shrink-0 rounded-lg bg-white p-0.5">
+              <MoleculeSkeletal smiles={smiles} size={36} />
+            </div>
           )}
+          <div className="truncate font-semibold">
+            {molecule.name}
+            {molecule.formula && (
+              <span className="text-neutral-500 font-normal"> · {molecule.formula}</span>
+            )}
+          </div>
         </div>
         {status === "ready" && (
           <div className="flex items-center gap-1">
@@ -123,9 +133,19 @@ export function Molecule3DViewer({ molecule }: { molecule: Molecule }) {
           </div>
         )}
         {status === "error" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-center px-4 text-sm text-neutral-500">
-            <span className="text-3xl">🧪</span>
-            <span>אין חיבור לאינטרנט / לא נמצא מודל תלת-ממדי עבור {molecule.name}</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center px-4 text-sm text-neutral-500">
+            {smiles ? (
+              <div className="rounded-lg bg-white p-2">
+                <MoleculeSkeletal smiles={smiles} size={160} />
+              </div>
+            ) : (
+              <span className="text-3xl">🧪</span>
+            )}
+            <span>
+              {smiles
+                ? "מודל תלת-ממדי לא זמין כרגע - הנה המבנה השטוח"
+                : `אין חיבור לאינטרנט / לא נמצא מודל תלת-ממדי עבור ${molecule.name}`}
+            </span>
             {molecule.formula && <span className="font-mono">{molecule.formula}</span>}
           </div>
         )}

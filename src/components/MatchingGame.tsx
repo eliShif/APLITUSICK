@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState, useCallback } from "react";
 import type { MatchingGame as MatchingGameType } from "@/content/types";
 import { shuffle } from "@/lib/shuffle";
+import { MoleculeSkeletal } from "@/components/MoleculeSkeletal";
 
 interface LineCoord {
   key: string;
@@ -169,7 +170,9 @@ export function MatchingGame({ game }: { game: MatchingGameType }) {
                     ref={registerRef(`L-${pairIdx}`)}
                     disabled={isMatched}
                     onClick={() => pickLeft(pairIdx)}
-                    className={`rounded-lg border px-3 py-2 text-sm text-right transition ${
+                    className={`rounded-lg border px-3 py-2 text-sm transition ${
+                      pairs[pairIdx].leftSmiles ? "flex items-center justify-center" : "text-right"
+                    } ${
                       isMatched
                         ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 opacity-70"
                         : isSelected
@@ -177,7 +180,11 @@ export function MatchingGame({ game }: { game: MatchingGameType }) {
                         : "border-black/10 dark:border-white/10 hover:border-emerald-500"
                     }`}
                   >
-                    {pairs[pairIdx].left}
+                    {pairs[pairIdx].leftSmiles ? (
+                      <MoleculeSkeletal smiles={pairs[pairIdx].leftSmiles} size={64} className="bg-white rounded" />
+                    ) : (
+                      pairs[pairIdx].left
+                    )}
                   </button>
                 );
               })}

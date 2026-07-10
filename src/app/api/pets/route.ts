@@ -1,3 +1,8 @@
+// חובה - בלי זה Next.js עלול להגיש תגובה מטמונה (סטטית) לאותו URL,
+// כך שרענון תמונות בפועל היה מחזיר בדיוק את אותן תמונות בכל פעם.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface PetImage {
   id: string;
   url: string;
@@ -96,5 +101,8 @@ export async function GET(request: Request) {
     return Response.json({ images: [] }, { status: 502 });
   }
 
-  return Response.json({ images: images.slice(0, count) });
+  return Response.json(
+    { images: images.slice(0, count) },
+    { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
+  );
 }

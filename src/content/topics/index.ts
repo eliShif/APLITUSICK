@@ -2,6 +2,7 @@ import type { Topic } from "@/content/types";
 import { nomenclature } from "./nomenclature";
 import { stereochemistry } from "./stereochemistry";
 import { nucleophilicSubstitution } from "./nucleophilic-substitution";
+import { reactivityToolkit } from "./reactivity-toolkit";
 import { elimination } from "./elimination";
 import { alkeneAddition } from "./alkene-addition";
 import { alcoholsThiols } from "./alcohols-thiols";
@@ -16,6 +17,7 @@ export const topics: Topic[] = [
   nomenclature,
   stereochemistry,
   nucleophilicSubstitution,
+  reactivityToolkit,
   elimination,
   alkeneAddition,
   alcoholsThiols,

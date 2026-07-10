@@ -54,6 +54,8 @@ export interface MatchPair {
   left: string;
   /** הצד שמוצג בעמודה השמאלית (למשל שם/הגדרה) */
   right: string;
+  /** SMILES אופציונלי - כשקיים, מצויר ציור שלד קווי במקום טקסט ה-left */
+  leftSmiles?: string;
 }
 
 export interface MatchingGame {

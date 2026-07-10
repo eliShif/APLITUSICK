@@ -7,6 +7,7 @@ import { SummarySectionView } from "@/components/SummarySectionView";
 import { ComparisonTableView } from "@/components/ComparisonTableView";
 import { MermaidDiagram } from "@/components/MermaidDiagram";
 import { Molecule3DViewer } from "@/components/Molecule3DViewer";
+import { MECHANISM_ART } from "@/components/mechanismArt";
 
 const Quiz = dynamic(() => import("@/components/Quiz").then((m) => m.Quiz), { ssr: false });
 const MatchingGame = dynamic(
@@ -25,6 +26,7 @@ export function TopicPageView({ topic }: { topic: Topic }) {
     ...(topic.matchingGame ? [{ id: "matching" as const, label: "משחק התאמה" }] : []),
   ];
   const [tab, setTab] = useState<TabId>("summary");
+  const MechanismArt = MECHANISM_ART[topic.slug];
 
   return (
     <div className="space-y-6">
@@ -64,6 +66,7 @@ export function TopicPageView({ topic }: { topic: Topic }) {
 
       {tab === "diagrams" && (
         <div className="space-y-6">
+          {MechanismArt && <MechanismArt />}
           {topic.diagrams?.map((d, i) => (
             <MermaidDiagram key={i} chart={d.mermaid} title={d.title} note={d.note} />
           ))}

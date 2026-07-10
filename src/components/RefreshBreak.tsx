@@ -16,7 +16,12 @@ const GRID_GAP_PX = 12;
 const MAX_TOTAL = 40;
 
 async function fetchPets(kind: "dog" | "cat" | "funny", count: number): Promise<BreakImage[]> {
-  const res = await fetch(`/api/pets?kind=${kind}&count=${count}`);
+  // פרמטר ייחודי לכל בקשה + no-store, כדי לוודא שאף שכבת מטמון (דפדפן/CDN) לא
+  // תחזיר תוצאה ישנה כשמבקשים "עוד תמונות" עם אותם kind/count.
+  const cacheBuster = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const res = await fetch(`/api/pets?kind=${kind}&count=${count}&r=${cacheBuster}`, {
+    cache: "no-store",
+  });
   const data: { images: BreakImage[] } = await res.json();
   return data.images ?? [];
 }

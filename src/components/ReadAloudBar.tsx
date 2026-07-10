@@ -6,12 +6,46 @@ const RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
 // הערכה גסה של קצב דיבור בקצב רגיל (rate=1), כדי לתרגם "5 שניות" למספר מילים לדלג עליהן -
 // ל-Web Speech API אין יכולת "seek" אמיתית לפי זמן, זו קירוב סביר בהיעדר תמיכה כזו בדפדפן.
 const WORDS_PER_SECOND_AT_RATE_1 = 2.5;
+const VOICE_STORAGE_KEY = "chem-site-read-aloud-voice";
 
 function stripForSpeech(text: string): string {
   return text
     .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** מדרג קולות: קולות רשת (Google וכו') בדרך כלל הרבה יותר טבעיים מקולות מקומיים
+ *  (כמו espeak) שנוטים "לאיית" עברית במקום להקריא אותה כמו שצריך. */
+function rankVoice(v: SpeechSynthesisVoice): number {
+  let score = 0;
+  if (!v.localService) score += 10;
+  if (/google/i.test(v.name)) score += 5;
+  return score;
+}
+
+function useVoices() {
+  const [allVoices, setAllVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    function load() {
+      setAllVoices(window.speechSynthesis.getVoices());
+    }
+    load();
+    window.speechSynthesis.addEventListener("voiceschanged", load);
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", load);
+  }, []);
+
+  const hebrewVoices = useMemo(
+    () =>
+      [...allVoices]
+        .filter((v) => v.lang?.toLowerCase().startsWith("he"))
+        .sort((a, b) => rankVoice(b) - rankVoice(a)),
+    [allVoices]
+  );
+
+  return { allVoices, hebrewVoices };
 }
 
 export function ReadAloudBar({ text }: { text: string }) {
@@ -27,24 +61,32 @@ export function ReadAloudBar({ text }: { text: string }) {
   const [supported, setSupported] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [rate, setRate] = useState(1);
+  const [voiceURI, setVoiceURI] = useState<string>("");
   const wordIndexRef = useRef(0);
   const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
+
+  const { hebrewVoices } = useVoices();
 
   useEffect(() => {
     setSupported(typeof window !== "undefined" && "speechSynthesis" in window);
   }, []);
 
+  // בוחרים קול ברירת מחדל: מה ששמור מפעם קודמת (אם עדיין קיים), אחרת הקול העברי המדורג הכי גבוה
   useEffect(() => {
-    if (!supported) return;
-    function pickVoice() {
-      const voices = window.speechSynthesis.getVoices();
-      voiceRef.current = voices.find((v) => v.lang?.toLowerCase().startsWith("he")) ?? null;
-    }
-    pickVoice();
-    window.speechSynthesis.addEventListener("voiceschanged", pickVoice);
-    return () => window.speechSynthesis.removeEventListener("voiceschanged", pickVoice);
-  }, [supported]);
+    if (hebrewVoices.length === 0) return;
+    const saved = typeof window !== "undefined" ? localStorage.getItem(VOICE_STORAGE_KEY) : null;
+    const stillExists = saved && hebrewVoices.some((v) => v.voiceURI === saved);
+    setVoiceURI((prev) => {
+      if (prev && hebrewVoices.some((v) => v.voiceURI === prev)) return prev;
+      return stillExists ? (saved as string) : hebrewVoices[0].voiceURI;
+    });
+  }, [hebrewVoices]);
+
+  function selectVoice(uri: string) {
+    setVoiceURI(uri);
+    if (typeof window !== "undefined") localStorage.setItem(VOICE_STORAGE_KEY, uri);
+    if (playing) speakFromWord(wordIndexRef.current, rate, uri);
+  }
 
   // עצירה אוטומטית כשעוזבים את הנושא/הטאב
   useEffect(() => {
@@ -63,7 +105,7 @@ export function ReadAloudBar({ text }: { text: string }) {
     return idx;
   }
 
-  function speakFromWord(wordIndex: number, speechRate: number) {
+  function speakFromWord(wordIndex: number, speechRate: number, useVoiceURI: string) {
     if (!supported || wordOffsets.length === 0) return;
     const clamped = Math.min(Math.max(wordIndex, 0), wordOffsets.length - 1);
     const startChar = wordOffsets[clamped];
@@ -74,7 +116,8 @@ export function ReadAloudBar({ text }: { text: string }) {
     const utter = new SpeechSynthesisUtterance(slice);
     utter.lang = "he-IL";
     utter.rate = speechRate;
-    if (voiceRef.current) utter.voice = voiceRef.current;
+    const chosenVoice = hebrewVoices.find((v) => v.voiceURI === useVoiceURI);
+    if (chosenVoice) utter.voice = chosenVoice;
 
     utter.onboundary = (e) => {
       if (typeof e.charIndex === "number") {
@@ -101,13 +144,13 @@ export function ReadAloudBar({ text }: { text: string }) {
       window.speechSynthesis.cancel();
       setPlaying(false);
     } else {
-      speakFromWord(wordIndexRef.current, rate);
+      speakFromWord(wordIndexRef.current, rate, voiceURI);
     }
   }
 
   function restart() {
     wordIndexRef.current = 0;
-    speakFromWord(0, rate);
+    speakFromWord(0, rate, voiceURI);
   }
 
   function skip(deltaSeconds: number) {
@@ -115,7 +158,7 @@ export function ReadAloudBar({ text }: { text: string }) {
     const delta = deltaSeconds < 0 ? -words : words;
     const target = wordIndexRef.current + delta;
     if (playing) {
-      speakFromWord(target, rate);
+      speakFromWord(target, rate, voiceURI);
     } else {
       wordIndexRef.current = Math.min(Math.max(target, 0), wordOffsets.length - 1);
     }
@@ -123,7 +166,7 @@ export function ReadAloudBar({ text }: { text: string }) {
 
   function changeRate(newRate: number) {
     setRate(newRate);
-    if (playing) speakFromWord(wordIndexRef.current, newRate);
+    if (playing) speakFromWord(wordIndexRef.current, newRate, voiceURI);
   }
 
   if (!supported) return null;
@@ -134,9 +177,7 @@ export function ReadAloudBar({ text }: { text: string }) {
         onClick={togglePlay}
         aria-label={playing ? "עצור הקראה" : "הקרא בקול"}
         className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-          playing
-            ? "bg-emerald-600 text-white"
-            : "bg-black/5 dark:bg-white/10 hover:bg-black/10"
+          playing ? "bg-emerald-600 text-white" : "bg-black/5 dark:bg-white/10 hover:bg-black/10"
         }`}
       >
         {playing ? "⏸ עצור" : "🔊 הקראה"}
@@ -177,6 +218,26 @@ export function ReadAloudBar({ text }: { text: string }) {
           </option>
         ))}
       </select>
+      {hebrewVoices.length > 1 && (
+        <select
+          value={voiceURI}
+          onChange={(e) => selectVoice(e.target.value)}
+          aria-label="בחירת קול הקראה"
+          title="אם ההקראה נשמעת רובוטית - נסו קול אחר מהרשימה"
+          className="rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 px-2 py-1 text-xs font-semibold cursor-pointer max-w-[110px]"
+        >
+          {hebrewVoices.map((v) => (
+            <option key={v.voiceURI} value={v.voiceURI}>
+              {v.name.replace(/^Microsoft |^Google /, "")}
+            </option>
+          ))}
+        </select>
+      )}
+      {hebrewVoices.length === 0 && (
+        <span className="text-[11px] text-neutral-400">
+          לא נמצא קול עברי במערכת - ההקראה עשויה להישמע לא טבעית
+        </span>
+      )}
     </div>
   );
 }
