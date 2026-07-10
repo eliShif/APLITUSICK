@@ -1,19 +1,62 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface BreakImage {
   id: string;
   url: string;
-  kind: "dog" | "cat";
+  kind: "dog" | "cat" | "funny";
+  caption?: string;
 }
 
-type Filter = "all" | "dog" | "cat";
+type Filter = "all" | "dog" | "cat" | "funny";
 
-async function fetchPets(kind: "dog" | "cat", count: number): Promise<BreakImage[]> {
+const MIN_ITEM_PX = 150;
+const GRID_GAP_PX = 12;
+const MAX_TOTAL = 40;
+
+async function fetchPets(kind: "dog" | "cat" | "funny", count: number): Promise<BreakImage[]> {
   const res = await fetch(`/api/pets?kind=${kind}&count=${count}`);
   const data: { images: BreakImage[] } = await res.json();
   return data.images ?? [];
+}
+
+/** מודד את הרוחב/גובה הפנויים של הגריד ומחשב כמה עמודות/שורות מלאות נכנסות בלי גלילה. */
+function useGridCapacity(gridRef: React.RefObject<HTMLDivElement | null>) {
+  const [capacity, setCapacity] = useState({ columns: 2, rows: 3 });
+
+  const recompute = useCallback(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const width = el.clientWidth;
+    if (width <= 0) return;
+
+    const columns = Math.max(2, Math.floor((width + GRID_GAP_PX) / (MIN_ITEM_PX + GRID_GAP_PX)));
+    const itemSize = (width - (columns - 1) * GRID_GAP_PX) / columns;
+
+    const top = el.getBoundingClientRect().top;
+    const availableHeight = window.innerHeight - top - 16;
+    const rows = Math.max(1, Math.floor((availableHeight + GRID_GAP_PX) / (itemSize + GRID_GAP_PX)));
+
+    setCapacity((prev) => (prev.columns === columns && prev.rows === rows ? prev : { columns, rows }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    recompute();
+    const onResize = () => recompute();
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
+    const ro = new ResizeObserver(() => recompute());
+    if (gridRef.current) ro.observe(gridRef.current);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
+      ro.disconnect();
+    };
+  }, [recompute, gridRef]);
+
+  return capacity;
 }
 
 export function RefreshBreak() {
@@ -23,17 +66,30 @@ export function RefreshBreak() {
   const [lightbox, setLightbox] = useState<BreakImage | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  const load = useCallback(async (f: Filter) => {
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const { columns, rows } = useGridCapacity(gridRef);
+  const total = Math.min(MAX_TOTAL, columns * rows);
+
+  const load = useCallback(async (f: Filter, count: number, cols: number) => {
     setLoading(true);
     try {
       let next: BreakImage[] = [];
-      if (f === "dog") next = await fetchPets("dog", 12);
-      else if (f === "cat") next = await fetchPets("cat", 12);
-      else {
-        const [dogs, cats] = await Promise.all([fetchPets("dog", 6), fetchPets("cat", 6)]);
-        next = [...dogs, ...cats].sort(() => Math.random() - 0.5);
+      if (f === "dog" || f === "cat" || f === "funny") {
+        next = await fetchPets(f, count);
+      } else {
+        const third = Math.ceil(count / 3);
+        const [dogs, cats, funny] = await Promise.all([
+          fetchPets("dog", third),
+          fetchPets("cat", third),
+          fetchPets("funny", third),
+        ]);
+        next = [...dogs, ...cats, ...funny].sort(() => Math.random() - 0.5).slice(0, count);
       }
-      setImages(next);
+      // חיתוך לשורות מלאות בלבד - אם המקור החזיר פחות תמונות מהמבוקש (למשל
+      // בפילטר "מצחיקים" עם היצע דל), עדיף להציג פחות תמונות בשורה שלמה
+      // מאשר שורה אחרונה חסרה.
+      const fullRows = Math.floor(next.length / cols) * cols;
+      setImages(fullRows > 0 ? next.slice(0, fullRows) : next);
     } catch {
       // ignore - keep previous grid on network error
     } finally {
@@ -42,14 +98,15 @@ export function RefreshBreak() {
   }, []);
 
   useEffect(() => {
-    load(filter);
-  }, [filter, load]);
+    load(filter, total, columns);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, total, columns]);
 
   useEffect(() => {
     if (!autoRefresh) return;
-    const interval = setInterval(() => load(filter), 20000);
+    const interval = setInterval(() => load(filter, total, columns), 20000);
     return () => clearInterval(interval);
-  }, [autoRefresh, filter, load]);
+  }, [autoRefresh, filter, total, columns, load]);
 
   useEffect(() => {
     if (!lightbox) return;
@@ -68,7 +125,7 @@ export function RefreshBreak() {
       const a = document.createElement("a");
       a.href = objectUrl;
       const ext = img.url.split(".").pop()?.split("?")[0] || "jpg";
-      a.download = `${img.kind}-${img.id}.${ext}`;
+      a.download = `${img.kind}-${img.id.replace(/[^a-z0-9]/gi, "").slice(-10)}.${ext}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -82,14 +139,17 @@ export function RefreshBreak() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">הפסקת התרעננות 🐶🐱</h1>
-          <p className="text-sm text-neutral-500">קצת אוויר לראש בין נושא לנושא - התמונות מתעדכנות אוטומטית</p>
+          <h1 className="text-2xl font-extrabold tracking-tight">הפסקת התרעננות 🐶🐱</h1>
+          <p className="text-sm text-neutral-500 mt-1">
+            קצת אוויר לראש בין נושא לנושא - תמונות חמודות ומצחיקות שמתעדכנות אוטומטית
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {([
             ["all", "הכל"],
             ["dog", "כלבים 🐶"],
             ["cat", "חתולים 🐱"],
+            ["funny", "מצחיקים 🤣"],
           ] as [Filter, string][]).map(([val, label]) => (
             <button
               key={val}
@@ -104,7 +164,7 @@ export function RefreshBreak() {
             </button>
           ))}
           <button
-            onClick={() => load(filter)}
+            onClick={() => load(filter, total, columns)}
             disabled={loading}
             className="rounded-full bg-neutral-800 dark:bg-white/10 text-white px-3 py-1.5 text-sm font-semibold hover:opacity-90 disabled:opacity-50"
           >
@@ -121,7 +181,11 @@ export function RefreshBreak() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
+      <div
+        ref={gridRef}
+        className="grid"
+        style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gap: GRID_GAP_PX }}
+      >
         {images.map((img) => (
           <button
             key={img.id}
@@ -131,10 +195,15 @@ export function RefreshBreak() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={img.url}
-              alt={img.kind === "dog" ? "כלב רנדומלי" : "חתול רנדומלי"}
+              alt={img.caption ?? (img.kind === "dog" ? "כלב רנדומלי" : img.kind === "cat" ? "חתול רנדומלי" : "תמונה מצחיקה")}
               loading="lazy"
               className="h-full w-full object-cover transition group-hover:scale-105"
             />
+            {img.kind === "funny" && img.caption && (
+              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-2 pb-1.5 pt-4 text-right text-[11px] font-semibold text-white line-clamp-2">
+                {img.caption}
+              </span>
+            )}
             <span className="absolute bottom-1 left-1 rounded-full bg-black/50 px-2 py-0.5 text-xs text-white opacity-0 transition group-hover:opacity-100">
               הגדל
             </span>
@@ -151,9 +220,12 @@ export function RefreshBreak() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={lightbox.url}
-              alt={lightbox.kind === "dog" ? "כלב רנדומלי" : "חתול רנדומלי"}
-              className="max-h-[80vh] w-auto rounded-xl object-contain"
+              alt={lightbox.caption ?? (lightbox.kind === "dog" ? "כלב רנדומלי" : lightbox.kind === "cat" ? "חתול רנדומלי" : "תמונה מצחיקה")}
+              className="max-h-[75vh] w-auto rounded-xl object-contain"
             />
+            {lightbox.caption && (
+              <p className="mt-2 text-center text-sm text-white/90">{lightbox.caption}</p>
+            )}
             <div className="mt-3 flex justify-center gap-3">
               <button
                 onClick={() => download(lightbox)}

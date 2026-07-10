@@ -29,10 +29,10 @@ export function TopicPageView({ topic }: { topic: Topic }) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
           {topic.icon} {topic.title}
         </h1>
-        {topic.subtitle && <p className="text-neutral-500 mt-1">{topic.subtitle}</p>}
+        {topic.subtitle && <p className="text-neutral-500 mt-1.5 leading-relaxed">{topic.subtitle}</p>}
       </div>
 
       <div className="flex flex-wrap gap-2 border-b border-black/10 dark:border-white/10 pb-2 overflow-x-auto">
