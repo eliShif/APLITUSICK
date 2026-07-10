@@ -1,98 +1,100 @@
 import { MechanismArtFrame, MECH_COLORS } from "./MechanismArtFrame";
 
 /**
- * היווצרות הקטל התוך-מולקולרי (הטבעת המחזורית) של גלוקוז.
- * גרסה תוך-מולקולרית של תוספת נוקלאופילית לקרבוניל: החמצן הרחוק (על C5, מקוצר כאן ל-"HO")
- * תוקף את פחמן הקרבוניל (C1, האלדהיד) בתוך אותה מולקולה, ויוצר טבעת פיראנוז עם פחמן אנומרי חדש.
- * מבנה קבוע: פאנל מגיבים (עם חצים מקווקווים) ← חץ תגובה ← פאנל תוצרים.
+ * המנגנון המלא של היווצרות ההקטל התוך-מולקולרי (הטבעת המחזורית) של גלוקוז - שני שלבים:
+ * 1) החמצן הרחוק (C5, מקוצר ל-HO) תוקף תוך-מולקולרית את פחמן הקרבוניל (C1) ⇽ אלקוקסיד טבעתי.
+ * 2) פרוטונציה של האלקוקסיד (על ידי מים/H3O+) ⇽ ההקטל הניטרלי הסופי, עם פחמן אנומרי חדש (α/β).
  */
 export function CycloalkanesCarbsRedoxArt() {
   return (
     <MechanismArtFrame
-      title="היווצרות הקטל טבעתי - הצורה המחזורית של גלוקוז"
-      note="זו תוספת נוקלאופילית תוך-מולקולרית (רגילה לגמרי מבחינת סוג הצעדים, בדיוק כמו תוספת לקרבוניל) - החמצן הרחוק (על C5) תוקף את פחמן הקרבוניל (C1). התוצר הוא פחמן אנומרי חדש (C1) שיכול להיות אלפא או בטא, ולכן נוצרת תערובת (מוטרוטציה)."
+      title="המנגנון המלא: היווצרות הקטל טבעתי - הצורה המחזורית של גלוקוז"
+      note="שלב 1: תוספת נוקלאופילית תוך-מולקולרית רגילה (בדיוק כמו תוספת לקרבוניל) - החמצן הרחוק (C5) תוקף את פחמן הקרבוניל (C1), וזוג האלקטרונים של C1=O נודד אל החמצן ⇽ אלקוקסיד טבעתי טעון שלילית. שלב 2: פרוטונציה מהירה של האלקוקסיד (על ידי מים/H3O⁺ בתמיסה) משלימה את ההקטל הניטרלי. הפחמן האנומרי (C1) יכול להתקבל בשתי צורות (α או β) - ולכן נוצרת תערובת (מוטרוטציה)."
     >
-      <svg viewBox="0 0 760 260" className="w-full h-auto" style={{ minWidth: 620 }}>
+      <svg viewBox="0 0 760 480" className="w-full h-auto" style={{ minWidth: 600 }}>
         <defs>
           <marker id="arrow-hemiacetal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill={MECH_COLORS.arrow} />
           </marker>
         </defs>
 
+        <text x="380" y="18" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="700">
+          שלב 1 - תקיפה תוך-מולקולרית של הקרבוניל
+        </text>
+
         {/* ===== פאנל 1: מגיבים - הצורה הפתוחה ===== */}
         <g fontFamily="inherit">
-          {/* החמצן הרחוק (על C5), מקוצר ל-HO, עם זוג בודד */}
-          <text x="48" y="158" fontSize="17" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">HO</text>
-          <circle cx="64" cy="138" r="2" fill={MECH_COLORS.nucleophile} />
-          <circle cx="72" cy="138" r="2" fill={MECH_COLORS.nucleophile} />
+          <text x="48" y="178" fontSize="17" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">HO</text>
+          <circle cx="64" cy="158" r="2" fill={MECH_COLORS.nucleophile} />
+          <circle cx="72" cy="158" r="2" fill={MECH_COLORS.nucleophile} />
 
-          {/* שאר השרשרת (C2-C4), מקוצרת */}
-          <line x1="86" y1="150" x2="116" y2="150" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="140" y="155" fontSize="20" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">···</text>
-          <line x1="164" y1="150" x2="194" y2="150" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <line x1="86" y1="170" x2="116" y2="170" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="140" y="175" fontSize="20" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">···</text>
+          <line x1="164" y1="170" x2="194" y2="170" stroke={MECH_COLORS.bond} strokeWidth="2" />
 
-          {/* פחמן הקרבוניל C1 */}
-          <circle cx="200" cy="150" r="4" fill={MECH_COLORS.atom} />
-          <text x="200" y="174" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">C1</text>
+          <circle cx="200" cy="170" r="4" fill={MECH_COLORS.atom} />
+          <text x="200" y="194" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">C1</text>
 
-          {/* H על הקרבוניל (אלדהיד) */}
-          <line x1="203" y1="153" x2="228" y2="170" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="236" y="177" fontSize="14" fill={MECH_COLORS.atom} textAnchor="middle">H</text>
+          <line x1="203" y1="173" x2="228" y2="190" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="236" y="197" fontSize="14" fill={MECH_COLORS.atom} textAnchor="middle">H</text>
 
-          {/* קשר כפול C1=O */}
-          <line x1="196" y1="146" x2="196" y2="100" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <line x1="204" y1="146" x2="204" y2="100" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="200" y="86" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">O</text>
+          <line x1="196" y1="166" x2="196" y2="120" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <line x1="204" y1="166" x2="204" y2="120" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="200" y="106" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">O</text>
 
-          {/* חץ 1: זוג בודד של ה-HO תוקף תוך-מולקולרית את C1 - חץ ארוך שמדלג מעל השרשרת */}
-          <path
-            d="M69,133 Q140,14 197,142"
-            fill="none"
-            stroke={MECH_COLORS.arrow}
-            strokeWidth="2.25"
-            markerEnd="url(#arrow-hemiacetal)"
-          />
-          {/* חץ 2: זוג האלקטרונים של C1=O נודד אל החמצן */}
-          <path
-            d="M203,132 Q226,108 206,90"
-            fill="none"
-            stroke={MECH_COLORS.arrow}
-            strokeWidth="2.25"
-            markerEnd="url(#arrow-hemiacetal)"
-          />
+          <path d="M69,153 Q140,34 197,162" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-hemiacetal)" />
+          <path d="M203,152 Q226,128 206,110" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-hemiacetal)" />
 
-          <text x="150" y="232" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
+          <text x="150" y="230" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
             מגיבים - הצורה הפתוחה
           </text>
         </g>
 
-        {/* ===== חץ תגובה ===== */}
-        <line x1="330" y1="150" x2="400" y2="150" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-hemiacetal)" />
+        <line x1="330" y1="170" x2="385" y2="170" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-hemiacetal)" />
 
-        {/* ===== פאנל 2: תוצרים - הקטל הטבעתי (פיראנוז) ===== */}
+        {/* ===== פאנל 2: תוצר שלב 1 - אלקוקסיד טבעתי ===== */}
         <g fontFamily="inherit">
-          <polygon
-            points="560,102 518.4,126 518.4,174 560,198 601.6,174 601.6,126"
-            fill="none"
-            stroke={MECH_COLORS.bond}
-            strokeWidth="2"
-          />
+          <polygon points="560,120 518.4,144 518.4,192 560,216 601.6,192 601.6,144" fill="none" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <circle cx="601.6" cy="144" r="3" fill={MECH_COLORS.nucleophile} />
+          <text x="624" y="138" fontSize="15" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">O</text>
+          <circle cx="560" cy="120" r="4" fill={MECH_COLORS.atom} />
+          <text x="560" y="100" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">C1</text>
+          <line x1="563" y1="115" x2="589" y2="86" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="604" y="78" fontSize="15" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">O⁻</text>
+          <text x="560" y="245" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
+            אלקוקסיד טבעתי (טעון שלילית)
+          </text>
+        </g>
 
-          {/* החמצן הטבעתי (מ-C5 לשעבר) */}
-          <circle cx="601.6" cy="126" r="3" fill={MECH_COLORS.nucleophile} />
-          <text x="624" y="120" fontSize="15" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">O</text>
+        <line x1="20" y1="270" x2="700" y2="270" stroke={MECH_COLORS.bond} strokeWidth="1" strokeDasharray="4 4" />
 
-          {/* הפחמן האנומרי - C1 */}
-          <circle cx="560" cy="102" r="4" fill={MECH_COLORS.atom} />
-          <text x="560" y="82" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">C1</text>
+        <text x="380" y="305" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="700">
+          שלב 2 - פרוטונציה ⇽ ההקטל הניטרלי הסופי
+        </text>
 
-          {/* קבוצת OH היוצאת מהפחמן האנומרי */}
-          <line x1="563" y1="97" x2="589" y2="68" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="602" y="60" fontSize="15" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">OH</text>
-          <text x="602" y="76" fontSize="10" fill={MECH_COLORS.atom} textAnchor="middle" opacity="0.65">(או O⁻)</text>
+        {/* ===== פאנל 3: מגיבים לשלב 2 - אלקוקסיד + H3O+ ===== */}
+        <g fontFamily="inherit">
+          <text x="90" y="365" fontSize="15" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">O⁻</text>
+          <circle cx="105" cy="350" r="2" fill={MECH_COLORS.electrophileLeavingGroup} />
+          <line x1="90" y1="372" x2="90" y2="400" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="90" y="418" fontSize="14" fill={MECH_COLORS.atom} textAnchor="middle">C1 (בטבעת)</text>
 
-          <text x="560" y="232" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
-            תוצרים - פחמן אנומרי חדש (α/β)
+          <text x="200" y="360" fontSize="17" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">H</text>
+          <text x="214" y="343" fontSize="12" fontWeight="700" fill={MECH_COLORS.charge} textAnchor="middle">⁺</text>
+          <text x="200" y="380" fontSize="10" fill={MECH_COLORS.atom} textAnchor="middle">(מ-H₃O⁺)</text>
+
+          <path d="M108,352 Q150,325 190,352" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-hemiacetal)" />
+        </g>
+
+        <line x1="250" y1="360" x2="305" y2="360" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-hemiacetal)" />
+
+        {/* ===== פאנל 4: תוצר סופי - ההקטל הניטרלי ===== */}
+        <g fontFamily="inherit">
+          <text x="380" y="365" fontSize="15" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">OH</text>
+          <line x1="380" y1="372" x2="380" y2="400" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="380" y="418" fontSize="14" fill={MECH_COLORS.atom} textAnchor="middle">C1 (הפחמן האנומרי)</text>
+          <text x="380" y="450" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
+            הקטל ניטרלי מוכן - α או β (מוטרוטציה)
           </text>
         </g>
       </svg>

@@ -10,7 +10,25 @@ interface PetImage {
   caption?: string;
 }
 
-const FUNNY_SUBREDDITS = ["funnyanimals", "AnimalsBeingBros", "AnimalsBeingJerks", "aww"];
+// רשימה רחבה בכוונה - כל תת-פורום בודד מחזיר מעט תמונות טריות (ה"hot" שלו לא
+// מתחלף כל כמה שניות), אז כדי לקבל מגוון אמיתי בין רענון לרענון (ולא לחזור על
+// אותן תמונות) צריך לאגד מכמה שיותר מקורות בבת אחת ולערבב אותם.
+const FUNNY_SUBREDDITS = [
+  "funnyanimals",
+  "AnimalsBeingBros",
+  "AnimalsBeingJerks",
+  "AnimalsBeingConfused",
+  "CatsStandingUp",
+  "Awwducational",
+  "blursedcats",
+  "aww",
+  "zoomies",
+  "CatsAreLiquid",
+  "Dogswithjobs",
+  "Eyebleach",
+  "rarepuppers",
+  "redpandas",
+];
 // רק תמונות סטטיות - gif נטען לאט מדי ופוגע בתחושת המסך המלא
 const STATIC_IMAGE_EXT = /\.(jpe?g|png|webp)(\?.*)?$/i;
 const NON_CONTENT_TITLE = /community announcement|stance on spam|is now (private|restricted)|moderator|subreddit (rules|update)|megathread/i;
@@ -58,12 +76,15 @@ interface MemePost {
   nsfw: boolean;
 }
 
-async function fetchFunny(count: number): Promise<PetImage[]> {
-  // כל תת-פורום קטן ומחזיר לעיתים מעט תוצאות - שולפים מכולם במקביל ומאגדים
-  // כדי להגיע לכמות המבוקשת גם אם חלקם "יבשים" כרגע.
+async function fetchFunny(): Promise<PetImage[]> {
+  // כל תת-פורום בודד "מתקרה" סביב 20-25 תמונות זמינות בלי קשר לכמות שמבקשים
+  // (מוגבל ל"hot" הנוכחי שלו) - אז תמיד מבקשים את המקסימום הסביר מכל אחד,
+  // ומאגדים מכל 14 המקורות (ראו FUNNY_SUBREDDITS) כדי לבנות בריכה גדולה
+  // ומגוונת לבחירה רנדומלית ממנה, במקום להסתפק בכמה תמונות חוזרות.
+  const PER_SUB_REQUEST = 25;
   const results = await Promise.allSettled(
     FUNNY_SUBREDDITS.map(async (sub) => {
-      const res = await fetch(`https://meme-api.com/gimme/${sub}/${count * 2}`, {
+      const res = await fetch(`https://meme-api.com/gimme/${sub}/${PER_SUB_REQUEST}`, {
         cache: "no-store",
       });
       if (!res.ok) return [] as MemePost[];
@@ -72,11 +93,15 @@ async function fetchFunny(count: number): Promise<PetImage[]> {
     })
   );
 
+  const seen = new Set<string>();
   const pool: PetImage[] = [];
   for (const r of results) {
     if (r.status !== "fulfilled") continue;
     for (const m of r.value) {
-      if (m.nsfw || !STATIC_IMAGE_EXT.test(m.url) || NON_CONTENT_TITLE.test(m.title)) continue;
+      if (seen.has(m.postLink) || m.nsfw || !STATIC_IMAGE_EXT.test(m.url) || NON_CONTENT_TITLE.test(m.title)) {
+        continue;
+      }
+      seen.add(m.postLink);
       pool.push({ id: m.postLink, url: m.url, kind: "funny" as const, caption: m.title });
     }
   }
@@ -96,7 +121,7 @@ export async function GET(request: Request) {
   try {
     if (kind === "dog") images = await fetchDogs(count);
     else if (kind === "cat") images = await fetchCats(count);
-    else images = await fetchFunny(count);
+    else images = await fetchFunny();
   } catch {
     return Response.json({ images: [] }, { status: 502 });
   }
