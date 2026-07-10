@@ -70,7 +70,12 @@ export function RefreshBreak() {
   const { columns, rows } = useGridCapacity(gridRef);
   const total = Math.min(MAX_TOTAL, columns * rows);
 
+  // עוקב אחרי בקשת הטעינה העדכנית ביותר - כדי שתשובה איטית מפילטר קודם (כמו
+  // "הכל" שדורש 3 קריאות מקבילות) לא תדרוס תוצאה שכבר הגיעה מפילטר מאוחר יותר.
+  const requestIdRef = useRef(0);
+
   const load = useCallback(async (f: Filter, count: number, cols: number) => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     try {
       let next: BreakImage[] = [];
@@ -85,6 +90,7 @@ export function RefreshBreak() {
         ]);
         next = [...dogs, ...cats, ...funny].sort(() => Math.random() - 0.5).slice(0, count);
       }
+      if (requestId !== requestIdRef.current) return; // בקשה ישנה - יש תוצאה עדכנית יותר בדרך/שכבר הגיעה
       // חיתוך לשורות מלאות בלבד - אם המקור החזיר פחות תמונות מהמבוקש (למשל
       // בפילטר "מצחיקים" עם היצע דל), עדיף להציג פחות תמונות בשורה שלמה
       // מאשר שורה אחרונה חסרה.
@@ -93,7 +99,7 @@ export function RefreshBreak() {
     } catch {
       // ignore - keep previous grid on network error
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, []);
 

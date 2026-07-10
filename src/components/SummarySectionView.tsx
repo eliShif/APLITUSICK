@@ -1,9 +1,22 @@
 import type { SummarySection } from "@/content/types";
+import { ReadAloudBar } from "@/components/ReadAloudBar";
+
+function sectionToSpeechText(section: SummarySection): string {
+  const parts: string[] = [section.heading];
+  section.paragraphs?.forEach((p) => parts.push(p));
+  section.bullets?.forEach((b) => parts.push(b));
+  section.keyDifferences?.forEach((box) => {
+    parts.push(box.title);
+    box.items.forEach((item) => parts.push(item));
+  });
+  return parts.join(". ");
+}
 
 export function SummarySectionView({ section }: { section: SummarySection }) {
   return (
     <div className="space-y-3">
       <h3 className="text-lg font-extrabold tracking-tight">{section.heading}</h3>
+      <ReadAloudBar text={sectionToSpeechText(section)} />
       {section.paragraphs?.map((p, i) => (
         <p key={i} className="leading-relaxed text-neutral-700 dark:text-neutral-300">
           {p}
