@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Rubik } from "next/font/google";
+import "katex/dist/katex.min.css";
 import "./globals.css";
 import { AppShell } from "@/components/AppShell";
 

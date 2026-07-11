@@ -1,4 +1,5 @@
 import { MechanismArtFrame, MECH_COLORS } from "./MechanismArtFrame";
+import { ChemLatexSvg } from "@/components/ChemLatex";
 
 /**
  * דוגמת הייחוס לכל שאר תרשימי "מנגנון עם חצים" באתר - SN2, התקפה אחורית והיפוך קונפיגורציה.
@@ -33,13 +34,12 @@ export function NucleophilicSubstitutionArt() {
           <circle cx="150" cy="108" r="4" fill={MECH_COLORS.atom} />
           <text x="150" y="128" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">C</text>
 
-          {/* קשר C-LG */}
+          {/* קשר C-LG - עדיין קשור, ללא מטען */}
           <line x1="154" y1="108" x2="235" y2="108" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="258" y="113" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">LG</text>
+          <ChemLatexSvg tex="\ce{LG}" x={258} y={110} fontSize={17} color={MECH_COLORS.electrophileLeavingGroup} />
 
           {/* נוקלאופיל תוקף מהצד הנגדי */}
-          <text x="55" y="113" fontSize="17" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">Nu</text>
-          <text x="70" y="98" fontSize="13" fill={MECH_COLORS.nucleophile} textAnchor="middle">⁻</text>
+          <ChemLatexSvg tex="\ce{Nu^-}" x={58} y={110} fontSize={17} color={MECH_COLORS.nucleophile} />
           <circle cx="78" cy="95" r="2" fill={MECH_COLORS.nucleophile} />
           <circle cx="84" cy="95" r="2" fill={MECH_COLORS.nucleophile} />
 
@@ -81,13 +81,12 @@ export function NucleophilicSubstitutionArt() {
           <circle cx="520" cy="108" r="4" fill={MECH_COLORS.atom} />
           <text x="520" y="98" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">C</text>
 
-          {/* קשר חדש Nu-C מהצד השני */}
+          {/* קשר חדש Nu-C מהצד השני - נייטרלי עכשיו, ללא מטען */}
           <line x1="480" y1="108" x2="516" y2="108" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="462" y="113" fontSize="17" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">Nu</text>
+          <ChemLatexSvg tex="\ce{Nu}" x={458} y={110} fontSize={17} color={MECH_COLORS.nucleophile} />
 
           {/* קבוצה עוזבת פרודה כאניון */}
-          <text x="640" y="113" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">LG</text>
-          <text x="658" y="98" fontSize="13" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">⁻</text>
+          <ChemLatexSvg tex="\ce{LG^-}" x={645} y={110} fontSize={17} color={MECH_COLORS.electrophileLeavingGroup} />
 
           <text x="550" y="185" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
             תוצרים - היפוך קונפיגורציה

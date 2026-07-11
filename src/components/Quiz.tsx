@@ -28,6 +28,7 @@ export function Quiz({ questions }: { questions: QuizQuestion[] }) {
   const [isCorrect, setIsCorrect] = useState(false);
   const [fillValue, setFillValue] = useState("");
   const [orderArrangement, setOrderArrangement] = useState<number[]>([]);
+  const [orderRevealed, setOrderRevealed] = useState(false);
   const [finished, setFinished] = useState(false);
 
   const current = prepared[index];
@@ -43,6 +44,7 @@ export function Quiz({ questions }: { questions: QuizQuestion[] }) {
     setAnswered(false);
     setIsCorrect(false);
     setFillValue("");
+    setOrderRevealed(false);
   }
 
   function commitAnswer(correct: boolean) {
@@ -190,6 +192,7 @@ export function Quiz({ questions }: { questions: QuizQuestion[] }) {
             order={orderArrangement}
             setOrder={setOrderArrangement}
             answered={answered}
+            revealed={orderRevealed}
             onSubmit={() => commitAnswer(orderArrangement.join(",") === q.correctOrder.join(","))}
           />
         )}
@@ -203,10 +206,35 @@ export function Quiz({ questions }: { questions: QuizQuestion[] }) {
             }`}
           >
             {isCorrect ? "תשובה נכונה!" : "לא מדויק."} {q.explanation && <span> {q.explanation}</span>}
+            {q.type === "order" && orderRevealed && !isCorrect && <span> הסדר שמוצג למעלה הוא הסדר הנכון.</span>}
           </div>
         )}
 
-        {answered && (
+        {answered && q.type === "order" && !isCorrect && !orderRevealed && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setOrderArrangement(shuffle(q.steps.map((_, i) => i)));
+                setAnswered(false);
+                setIsCorrect(false);
+              }}
+              className="rounded-full bg-neutral-800 dark:bg-white/10 text-white px-4 py-1.5 text-xs font-semibold hover:opacity-90"
+            >
+              🔁 ניסיון נוסף
+            </button>
+            <button
+              onClick={() => {
+                setOrderArrangement(q.correctOrder);
+                setOrderRevealed(true);
+              }}
+              className="rounded-full border border-black/10 dark:border-white/10 px-4 py-1.5 text-xs font-semibold hover:border-emerald-500"
+            >
+              👁️ גלה לי
+            </button>
+          </div>
+        )}
+
+        {answered && (q.type !== "order" || isCorrect || orderRevealed) && (
           <button
             onClick={next}
             className="rounded-full bg-emerald-600 text-white px-5 py-2 text-sm font-semibold hover:bg-emerald-700 transition"
@@ -234,12 +262,14 @@ function OrderQuestion({
   order,
   setOrder,
   answered,
+  revealed,
   onSubmit,
 }: {
   steps: string[];
   order: number[];
   setOrder: (o: number[]) => void;
   answered: boolean;
+  revealed: boolean;
   onSubmit: () => void;
 }) {
   const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -293,7 +323,9 @@ function OrderQuestion({
 
   return (
     <div className="space-y-3">
-      <div className="text-xs text-neutral-500">גררו את השלבים כדי לסדר אותם מהראשון לאחרון</div>
+      <div className="text-xs text-neutral-500">
+        {revealed ? "הסדר הנכון:" : "גררו את השלבים כדי לסדר אותם מהראשון לאחרון"}
+      </div>
       <div className="flex flex-col" style={{ gap: ROW_GAP_PX }}>
         {order.map((stepIndex, slot) => {
           const isDragging = draggingStep === stepIndex;
@@ -306,7 +338,9 @@ function OrderQuestion({
               onPointerUp={endDrag}
               onPointerCancel={endDrag}
               className={`flex items-center gap-3 rounded-lg border bg-white dark:bg-neutral-900 px-4 py-2.5 text-sm select-none ${
-                answered
+                revealed
+                  ? "border-blue-400 dark:border-blue-700"
+                  : answered
                   ? "border-black/10 dark:border-white/10"
                   : "border-black/10 dark:border-white/10 cursor-grab active:cursor-grabbing"
               }`}

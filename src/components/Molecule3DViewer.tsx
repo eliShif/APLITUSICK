@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Molecule } from "@/content/types";
 import { SMILES_BY_CID } from "@/content/moleculeSmiles";
 import { MoleculeSkeletal } from "@/components/MoleculeSkeletal";
+import { ChemFormula } from "@/components/ChemLatex";
 
 type ViewerStyle = "stick" | "sphere" | "line";
 
@@ -92,10 +93,12 @@ export function Molecule3DViewer({ molecule }: { molecule: Molecule }) {
               <MoleculeSkeletal smiles={smiles} size={36} />
             </div>
           )}
-          <div className="truncate font-semibold">
-            {molecule.name}
+          <div className="truncate font-semibold flex items-baseline gap-1">
+            <span className="truncate">{molecule.name}</span>
             {molecule.formula && (
-              <span className="text-neutral-500 font-normal"> · {molecule.formula}</span>
+              <span className="text-neutral-500 font-normal shrink-0">
+                · <ChemFormula formula={molecule.formula} />
+              </span>
             )}
           </div>
         </div>
@@ -146,7 +149,7 @@ export function Molecule3DViewer({ molecule }: { molecule: Molecule }) {
                 ? "מודל תלת-ממדי לא זמין כרגע - הנה המבנה השטוח"
                 : `אין חיבור לאינטרנט / לא נמצא מודל תלת-ממדי עבור ${molecule.name}`}
             </span>
-            {molecule.formula && <span className="font-mono">{molecule.formula}</span>}
+            {molecule.formula && <ChemFormula formula={molecule.formula} />}
           </div>
         )}
         <div ref={containerRef} className="absolute inset-0" />
