@@ -1,12 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
+import { useHebrewReadAloud } from "@/lib/useHebrewReadAloud";
 
 const RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
-// הערכה גסה של קצב דיבור בקצב רגיל (rate=1), כדי לתרגם "5 שניות" למספר מילים לדלג עליהן -
-// ל-Web Speech API אין יכולת "seek" אמיתית לפי זמן, זו קירוב סביר בהיעדר תמיכה כזו בדפדפן.
-const WORDS_PER_SECOND_AT_RATE_1 = 2.5;
-const VOICE_STORAGE_KEY = "chem-site-read-aloud-voice";
 
 function stripForSpeech(text: string): string {
   return text
@@ -15,194 +12,59 @@ function stripForSpeech(text: string): string {
     .trim();
 }
 
-/** מדרג קולות: קולות רשת (Google וכו') בדרך כלל הרבה יותר טבעיים מקולות מקומיים
- *  (כמו espeak) שנוטים "לאיית" עברית במקום להקריא אותה כמו שצריך. */
-function rankVoice(v: SpeechSynthesisVoice): number {
-  let score = 0;
-  if (!v.localService) score += 10;
-  if (/google/i.test(v.name)) score += 5;
-  return score;
-}
-
-function useVoices() {
-  const [allVoices, setAllVoices] = useState<SpeechSynthesisVoice[]>([]);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    function load() {
-      setAllVoices(window.speechSynthesis.getVoices());
-    }
-    load();
-    window.speechSynthesis.addEventListener("voiceschanged", load);
-    return () => window.speechSynthesis.removeEventListener("voiceschanged", load);
-  }, []);
-
-  const hebrewVoices = useMemo(
-    () =>
-      [...allVoices]
-        .filter((v) => v.lang?.toLowerCase().startsWith("he"))
-        .sort((a, b) => rankVoice(b) - rankVoice(a)),
-    [allVoices]
-  );
-
-  return { allVoices, hebrewVoices };
-}
-
 export function ReadAloudBar({ text }: { text: string }) {
   const cleanText = useMemo(() => stripForSpeech(text), [text]);
-  const wordOffsets = useMemo(() => {
-    const offsets: number[] = [];
-    const re = /\S+/g;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(cleanText))) offsets.push(m.index);
-    return offsets;
-  }, [cleanText]);
-
-  const [supported, setSupported] = useState(true);
-  const [playing, setPlaying] = useState(false);
-  const [rate, setRate] = useState(1);
-  const [voiceURI, setVoiceURI] = useState<string>("");
-  const wordIndexRef = useRef(0);
-  const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
-
-  const { hebrewVoices } = useVoices();
-
-  useEffect(() => {
-    setSupported(typeof window !== "undefined" && "speechSynthesis" in window);
-  }, []);
-
-  // בוחרים קול ברירת מחדל: מה ששמור מפעם קודמת (אם עדיין קיים), אחרת הקול העברי המדורג הכי גבוה
-  useEffect(() => {
-    if (hebrewVoices.length === 0) return;
-    const saved = typeof window !== "undefined" ? localStorage.getItem(VOICE_STORAGE_KEY) : null;
-    const stillExists = saved && hebrewVoices.some((v) => v.voiceURI === saved);
-    setVoiceURI((prev) => {
-      if (prev && hebrewVoices.some((v) => v.voiceURI === prev)) return prev;
-      return stillExists ? (saved as string) : hebrewVoices[0].voiceURI;
-    });
-  }, [hebrewVoices]);
-
-  function selectVoice(uri: string) {
-    setVoiceURI(uri);
-    if (typeof window !== "undefined") localStorage.setItem(VOICE_STORAGE_KEY, uri);
-    if (playing) speakFromWord(wordIndexRef.current, rate, uri);
-  }
-
-  // עצירה אוטומטית כשעוזבים את הנושא/הטאב
-  useEffect(() => {
-    return () => {
-      if (supported) window.speechSynthesis.cancel();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function findWordIndexForChar(absoluteChar: number): number {
-    let idx = 0;
-    for (let i = 0; i < wordOffsets.length; i++) {
-      if (wordOffsets[i] <= absoluteChar) idx = i;
-      else break;
-    }
-    return idx;
-  }
-
-  function speakFromWord(wordIndex: number, speechRate: number, useVoiceURI: string) {
-    if (!supported || wordOffsets.length === 0) return;
-    const clamped = Math.min(Math.max(wordIndex, 0), wordOffsets.length - 1);
-    const startChar = wordOffsets[clamped];
-    const slice = cleanText.slice(startChar);
-
-    window.speechSynthesis.cancel();
-
-    const utter = new SpeechSynthesisUtterance(slice);
-    utter.lang = "he-IL";
-    utter.rate = speechRate;
-    const chosenVoice = hebrewVoices.find((v) => v.voiceURI === useVoiceURI);
-    if (chosenVoice) utter.voice = chosenVoice;
-
-    utter.onboundary = (e) => {
-      if (typeof e.charIndex === "number") {
-        wordIndexRef.current = findWordIndexForChar(startChar + e.charIndex);
-      }
-    };
-    utter.onend = () => {
-      setPlaying(false);
-      wordIndexRef.current = 0;
-    };
-    utter.onerror = () => {
-      setPlaying(false);
-    };
-
-    utterRef.current = utter;
-    wordIndexRef.current = clamped;
-    window.speechSynthesis.speak(utter);
-    setPlaying(true);
-  }
-
-  function togglePlay() {
-    if (!supported) return;
-    if (playing) {
-      window.speechSynthesis.cancel();
-      setPlaying(false);
-    } else {
-      speakFromWord(wordIndexRef.current, rate, voiceURI);
-    }
-  }
-
-  function restart() {
-    wordIndexRef.current = 0;
-    speakFromWord(0, rate, voiceURI);
-  }
-
-  function skip(deltaSeconds: number) {
-    const words = Math.round(WORDS_PER_SECOND_AT_RATE_1 * rate * Math.abs(deltaSeconds));
-    const delta = deltaSeconds < 0 ? -words : words;
-    const target = wordIndexRef.current + delta;
-    if (playing) {
-      speakFromWord(target, rate, voiceURI);
-    } else {
-      wordIndexRef.current = Math.min(Math.max(target, 0), wordOffsets.length - 1);
-    }
-  }
-
-  function changeRate(newRate: number) {
-    setRate(newRate);
-    if (playing) speakFromWord(wordIndexRef.current, newRate, voiceURI);
-  }
+  const { supported, phase, loadPct, playing, rate, fallback, chunkProgress, toggle, restart, skip, changeRate } =
+    useHebrewReadAloud(cleanText);
 
   if (!supported) return null;
+
+  const isBusy = phase === "loading-model" || phase === "generating";
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 rounded-lg bg-black/[0.03] dark:bg-white/[0.05] px-2.5 py-1.5">
       <button
-        onClick={togglePlay}
+        onClick={toggle}
+        disabled={phase === "loading-model"}
         aria-label={playing ? "עצור הקראה" : "הקרא בקול"}
-        className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+        className={`rounded-full px-3 py-1 text-xs font-semibold transition disabled:opacity-60 ${
           playing ? "bg-emerald-600 text-white" : "bg-black/5 dark:bg-white/10 hover:bg-black/10"
         }`}
       >
-        {playing ? "⏸ עצור" : "🔊 הקראה"}
+        {phase === "loading-model"
+          ? `טוען קול (${loadPct}%)…`
+          : phase === "generating"
+          ? chunkProgress.total > 1
+            ? `מכין קטע ${chunkProgress.current}/${chunkProgress.total}…`
+            : "מייצר קול…"
+          : playing
+          ? "⏸ עצור"
+          : "🔊 הקראה"}
       </button>
       <button
         onClick={() => skip(-5)}
+        disabled={fallback}
         aria-label="אחורה 5 שניות"
         title="אחורה 5 שניות"
-        className="rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 px-2.5 py-1 text-xs font-semibold"
+        className="rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 disabled:opacity-40 px-2.5 py-1 text-xs font-semibold"
       >
         ⏪ 5 שנ׳
       </button>
       <button
         onClick={() => skip(5)}
+        disabled={fallback}
         aria-label="קדימה 5 שניות"
         title="קדימה 5 שניות"
-        className="rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 px-2.5 py-1 text-xs font-semibold"
+        className="rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 disabled:opacity-40 px-2.5 py-1 text-xs font-semibold"
       >
         5 שנ׳ ⏩
       </button>
       <button
         onClick={restart}
+        disabled={isBusy}
         aria-label="התחל מחדש"
         title="התחל מחדש"
-        className="rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 px-2.5 py-1 text-xs font-semibold"
+        className="rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 disabled:opacity-40 px-2.5 py-1 text-xs font-semibold"
       >
         🔁 התחלה
       </button>
@@ -218,24 +80,9 @@ export function ReadAloudBar({ text }: { text: string }) {
           </option>
         ))}
       </select>
-      {hebrewVoices.length > 1 && (
-        <select
-          value={voiceURI}
-          onChange={(e) => selectVoice(e.target.value)}
-          aria-label="בחירת קול הקראה"
-          title="אם ההקראה נשמעת רובוטית - נסו קול אחר מהרשימה"
-          className="rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 px-2 py-1 text-xs font-semibold cursor-pointer max-w-[110px]"
-        >
-          {hebrewVoices.map((v) => (
-            <option key={v.voiceURI} value={v.voiceURI}>
-              {v.name.replace(/^Microsoft |^Google /, "")}
-            </option>
-          ))}
-        </select>
-      )}
-      {hebrewVoices.length === 0 && (
+      {fallback && (
         <span className="text-[11px] text-neutral-400">
-          לא נמצא קול עברי במערכת - ההקראה עשויה להישמע לא טבעית
+          קול הרשת לא נטען - עברנו לקול המובנה של הדפדפן (בלי דילוג מדויק)
         </span>
       )}
     </div>

@@ -1,0 +1,90 @@
+{
+    "version": "1.0",
+    "truncation": null,
+    "padding": null,
+    "added_tokens": [
+        {
+            "id": 32,
+            "content": "<unk>",
+            "single_word": false,
+            "lstrip": false,
+            "rstrip": false,
+            "normalized": false,
+            "special": true
+        }
+    ],
+    "normalizer": {
+        "type": "Sequence",
+        "normalizers": [
+            {
+                "type": "Lowercase"
+            },
+            {
+                "type": "Replace",
+                "pattern": {
+                    "Regex": "[^ '|\\-אבגדהוזחטיךכלםמןנסעףפץצקרשת—]"
+                },
+                "content": ""
+            },
+            {
+                "type": "Strip",
+                "strip_left": true,
+                "strip_right": true
+            },
+            {
+                "type": "Replace",
+                "pattern": {
+                    "Regex": "(?=.)|(?<!^)$"
+                },
+                "content": "|"
+            }
+        ]
+    },
+    "pre_tokenizer": {
+        "type": "Split",
+        "pattern": {
+            "Regex": ""
+        },
+        "behavior": "Isolated",
+        "invert": false
+    },
+    "post_processor": null,
+    "decoder": null,
+    "model": {
+        "vocab": {
+            "|": 0,
+            "ו": 1,
+            "י": 2,
+            "א": 3,
+            "ה": 4,
+            "ל": 5,
+            "ת": 6,
+            "ש": 7,
+            "ב": 8,
+            "ם": 9,
+            "ר": 10,
+            "מ": 11,
+            "נ": 12,
+            "כ": 13,
+            "ע": 14,
+            "ד": 15,
+            "ח": 16,
+            "ק": 17,
+            "ן": 18,
+            "פ": 19,
+            "ג": 20,
+            "ס": 21,
+            "צ": 22,
+            "ז": 23,
+            "ך": 24,
+            "ט": 25,
+            "ץ": 26,
+            "ף": 27,
+            "—": 28,
+            "'": 29,
+            "-": 30,
+            " ": 31,
+            "<unk>": 32
+        }
+    }
+}

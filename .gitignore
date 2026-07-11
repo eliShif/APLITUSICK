@@ -45,3 +45,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated at build time (npm run build:worker) from src/lib/hebrewTts.worker.ts
+/public/hebrewTts.worker.js
