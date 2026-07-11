@@ -19,6 +19,7 @@ export function MermaidDiagram({ chart, title, note }: { chart: string; title?: 
           theme: "neutral",
           securityLevel: "strict",
           fontFamily: "inherit",
+          flowchart: { htmlLabels: true },
         });
         const { svg } = await mermaid.render(id, chart);
         if (!cancelled && ref.current) {

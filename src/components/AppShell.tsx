@@ -39,6 +39,15 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="mt-3 border-t border-black/10 dark:border-white/10 pt-3">
         <Link
+          href="/simulations"
+          onClick={onNavigate}
+          className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
+            pathname === "/simulations" ? "bg-emerald-600 text-white" : "hover:bg-black/5 dark:hover:bg-white/10"
+          }`}
+        >
+          🧬 סימולציות תלת-ממדיות (בטא)
+        </Link>
+        <Link
           href="/break"
           onClick={onNavigate}
           className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
