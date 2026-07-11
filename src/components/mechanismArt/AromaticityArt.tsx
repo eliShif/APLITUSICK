@@ -1,4 +1,5 @@
 import { MechanismArtFrame, MECH_COLORS } from "./MechanismArtFrame";
+import { ChemLatexSvg } from "@/components/ChemLatex";
 
 /**
  * דלוקליזציה של יון פנוקסיד (ArO⁻) לתוך הטבעת הארומטית - הסבר לחומציות הגבוהה של פנול.
@@ -113,11 +114,12 @@ export function AromaticityArt() {
     >
       <svg viewBox="0 0 760 300" className="w-full h-auto" style={{ minWidth: 620 }}>
         <defs>
+          {/* orient="auto-start-reverse" מסובב את אותו החץ אוטומטית ב-180° בקצה ההתחלתי (markerStart),
+              כך שסימן חץ יחיד מספיק כדי לקבל חץ רזוננס דו-ראשי תקין (↔) - כמו ב-ResonanceArt.tsx.
+              (שני markers נפרדים עם path ממוראר ידנית, כפי שהיה כאן קודם, מבטל את הסיבוב האוטומטי
+              וגורם לראש החץ בצד ה-markerStart להצביע פנימה במקום החוצה.) */}
           <marker id="arrow-phenoxide" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill={MECH_COLORS.arrow} />
-          </marker>
-          <marker id="arrow-phenoxide-resonance-start" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M10,0 L0,5 L10,10 z" fill={MECH_COLORS.arrow} />
           </marker>
         </defs>
 
@@ -128,19 +130,14 @@ export function AromaticityArt() {
           {/* קשר C1-O בודד */}
           <line x1={c1_p1[0]} y1={c1_p1[1]} x2={o1x} y2={o1y} stroke={MECH_COLORS.bond} strokeWidth="2" />
 
-          {/* חמצן טעון שלילית - תווית, מטען, ושני זוגות בודדים */}
-          <text x={o1x} y={o1y - 12} fontSize="18" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">
-            O
-          </text>
-          <text x={o1x + 15} y={o1y - 22} fontSize="14" fill={MECH_COLORS.charge} textAnchor="middle">
-            ⁻
-          </text>
+          {/* חמצן טעון שלילית - תווית+מטען דרך KaTeX/mhchem (כמו O^{-} ב-CarboxylicAcidsArt), ושני זוגות בודדים */}
+          <ChemLatexSvg tex="O^{-}" x={o1x} y={o1y - 12} fontSize={18} color={MECH_COLORS.charge} />
           {/* זוג בודד עליון */}
-          <circle cx={o1x - 4} cy={o1y - 32} r="2" fill={MECH_COLORS.atom} />
-          <circle cx={o1x + 4} cy={o1y - 32} r="2" fill={MECH_COLORS.atom} />
+          <circle cx={o1x - 5} cy={o1y - 28} r="2" fill={MECH_COLORS.atom} />
+          <circle cx={o1x + 5} cy={o1y - 28} r="2" fill={MECH_COLORS.atom} />
           {/* זוג בודד שמאלי */}
-          <circle cx={o1x - 20} cy={o1y - 18} r="2" fill={MECH_COLORS.atom} />
-          <circle cx={o1x - 20} cy={o1y - 11} r="2" fill={MECH_COLORS.atom} />
+          <circle cx={o1x - 22} cy={o1y - 16} r="2" fill={MECH_COLORS.atom} />
+          <circle cx={o1x - 22} cy={o1y - 9} r="2" fill={MECH_COLORS.atom} />
 
           {/* תווית C1 / C2 */}
           <text x={c1_p1[0] + 14} y={c1_p1[1] - 2} fontSize="11" fill={MECH_COLORS.atom} textAnchor="middle">
@@ -173,7 +170,7 @@ export function AromaticityArt() {
           stroke={MECH_COLORS.arrow}
           strokeWidth="2.5"
           markerEnd="url(#arrow-phenoxide)"
-          markerStart="url(#arrow-phenoxide-resonance-start)"
+          markerStart="url(#arrow-phenoxide)"
         />
 
         {/* ===== פאנל 2: קשר C1=O כפול, מטען שלילי על C2 (אורתו) ===== */}
@@ -201,12 +198,10 @@ export function AromaticityArt() {
             C2
           </text>
 
-          {/* המטען השלילי עבר לפחמן האורתו C2, עם זוג בודד */}
-          <text x={c2_p2[0] + 34} y={c2_p2[1] - 6} fontSize="14" fill={MECH_COLORS.charge} textAnchor="middle" fontWeight="700">
-            ⁻
-          </text>
-          <circle cx={c2_p2[0] + 26} cy={c2_p2[1] - 22} r="2" fill={MECH_COLORS.charge} />
-          <circle cx={c2_p2[0] + 33} cy={c2_p2[1] - 22} r="2" fill={MECH_COLORS.charge} />
+          {/* המטען השלילי עבר לפחמן האורתו C2, עם זוג בודד - תווית מטען דרך KaTeX (כמו ^- ב-AlphaCarbonArt) */}
+          <ChemLatexSvg tex="^-" x={c2_p2[0] + 22} y={c2_p2[1] - 10} width={22} fontSize={14} color={MECH_COLORS.charge} anchor="start" />
+          <circle cx={c2_p2[0] + 26} cy={c2_p2[1] - 24} r="2" fill={MECH_COLORS.charge} />
+          <circle cx={c2_p2[0] + 33} cy={c2_p2[1] - 24} r="2" fill={MECH_COLORS.charge} />
 
           <text x={P2_CX} y={P2_CY + 90} fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
             מבנה תורם ב' - מטען על פחמן האורתו (C2)

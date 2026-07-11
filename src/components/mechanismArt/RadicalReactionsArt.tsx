@@ -1,9 +1,15 @@
 import { MechanismArtFrame, MECH_COLORS } from "./MechanismArtFrame";
+import { ChemLatexSvg } from "@/components/ChemLatex";
 
 /**
  * המנגנון המלא של שרשרת רדיקלית - שלושת סוגי השלבים ברצף אחד: אתחול, שני שלבי
  * ההתפשטות (שיחד מהווים את מחזור השרשרת החוזר), וסיום. כל שלב מצויר עם חצי
  * fishhook אמיתיים (ראש-חצי, אלקטרון בודד) - לא רק תיאור טקסטואלי.
+ *
+ * שני סוגי חצים שונים לגמרי, בכוונה: `arrow-radical` (ראש-חצי, fishhook) לתנועת
+ * אלקטרון בודד אחד בלבד, מול `arrow-radical-straight` (ראש חץ מלא, כפול) לחצי
+ * התקדמות-תגובה בין הפאנלים. אין תלת-ממד/טריז-מקווקוו כאן - אין מרכז סטריאוגני
+ * במנגנון רדיקלי, אז אין שימוש ב-WedgeBond/DashBond מ-BondPrimitives.
  */
 export function RadicalReactionsArt() {
   return (
@@ -11,120 +17,151 @@ export function RadicalReactionsArt() {
       title="המנגנון המלא: הלוגנציה רדיקלית - אתחול, שני שלבי התפשטות וסיום"
       note="החץ בעל ראש-חצי בלבד (fishhook) מסמן תנועה של אלקטרון בודד אחד - לא זוג! - בניגוד לחץ הכפול (ראש חץ מלא) של מנגנוני יונים כמו SN2. שני שלבי ההתפשטות (2+3) חוזרים על עצמם שוב ושוב במחזור השרשרת - רדיקל ה-X שנוצר בשלב 3 חוזר להתחיל שלב 2 מחדש על מולקולת R-H נוספת."
     >
-      <svg viewBox="0 0 720 620" className="w-full h-auto" style={{ minWidth: 520 }}>
+      <svg viewBox="0 0 720 630" className="w-full h-auto" style={{ minWidth: 520 }}>
         <defs>
+          {/* fishhook - ראש-חצי בלבד, לתנועת אלקטרון בודד אחד */}
           <marker id="arrow-radical" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0,5 L10,5 L0,0 z" fill={MECH_COLORS.arrow} />
           </marker>
+          {/* חץ רגיל, ראש כפול מלא - רק להתקדמות תגובה בין פאנלים (לא לתנועת אלקטרונים) */}
           <marker id="arrow-radical-straight" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill={MECH_COLORS.arrow} />
           </marker>
         </defs>
 
-        {/* ===== שלב 1: אתחול - שבירה הומוליטית של X2 ===== */}
-        <g fontFamily="inherit">
-          <text x="360" y="22" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="700">
-            שלב 1 - אתחול (Initiation)
+        {/* ===== שלב 1: אתחול - שבירה הומוליטית של X-X ===== */}
+        <g>
+          <text x="360" y="24" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="700">
+            שלב 1 · אתחול (Initiation)
           </text>
-          <text x="130" y="70" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
-          <line x1="145" y1="65" x2="185" y2="65" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="200" y="70" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
-          <circle cx="158" cy="65" r="2.5" fill={MECH_COLORS.charge} />
-          <circle cx="172" cy="65" r="2.5" fill={MECH_COLORS.charge} />
-          <path d="M158,65 Q145,40 130,55" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2" markerEnd="url(#arrow-radical)" />
-          <path d="M172,65 Q185,40 200,55" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2" markerEnd="url(#arrow-radical)" />
-          <text x="165" y="100" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">hν / חום</text>
 
-          <line x1="270" y1="65" x2="330" y2="65" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-radical-straight)" />
+          <text x="132" y="78" fontSize="18" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+          <line x1="148" y1="72" x2="192" y2="72" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="208" y="78" fontSize="18" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+          <circle cx="163" cy="72" r="2.5" fill={MECH_COLORS.charge} />
+          <circle cx="177" cy="72" r="2.5" fill={MECH_COLORS.charge} />
 
-          <text x="400" y="70" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
-          <circle cx="408" cy="55" r="2.5" fill={MECH_COLORS.charge} />
-          <text x="480" y="70" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
-          <circle cx="472" cy="55" r="2.5" fill={MECH_COLORS.charge} />
-          <text x="440" y="70" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">+</text>
+          <path d="M163,72 Q148,46 132,58" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2" markerEnd="url(#arrow-radical)" />
+          <path d="M177,72 Q192,46 208,58" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2" markerEnd="url(#arrow-radical)" />
 
-          <text x="330" y="130" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
-            X-X נשבר הומוליטית ⇽ שני רדיקלי הלוגן ראשונים
+          <ChemLatexSvg tex="h\nu" x={155} y={108} fontSize={14} color={MECH_COLORS.atom} anchor="end" width={46} />
+          <text x="163" y="113" fontSize="12" fill={MECH_COLORS.atom} textAnchor="start">
+            {" "}/ חום
+          </text>
+
+          <line x1="270" y1="72" x2="330" y2="72" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-radical-straight)" />
+
+          <text x="405" y="78" fontSize="18" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+          <circle cx="413" cy="60" r="2.5" fill={MECH_COLORS.charge} />
+          <text x="460" y="78" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">+</text>
+          <text x="515" y="78" fontSize="18" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+          <circle cx="507" cy="60" r="2.5" fill={MECH_COLORS.charge} />
+
+          <ChemLatexSvg tex="\ce{X2}" x={356} y={135} fontSize={14} color={MECH_COLORS.electrophileLeavingGroup} anchor="end" width={44} />
+          <text x="362" y="140" fontSize="12.5" fill={MECH_COLORS.atom} textAnchor="start">
+            נשבר הומוליטית ⇽ שני רדיקלי הלוגן הראשונים
           </text>
         </g>
 
-        <line x1="20" y1="160" x2="700" y2="160" stroke={MECH_COLORS.bond} strokeWidth="1" strokeDasharray="4 4" />
+        <line x1="20" y1="163" x2="700" y2="163" stroke={MECH_COLORS.bond} strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
 
         {/* ===== שלב 2: התפשטות א' - הסטת מימן ===== */}
-        <g fontFamily="inherit">
-          <text x="360" y="195" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="700">
-            שלב 2 - התפשטות א' (Propagation): •X + R-H → R• + H-X
+        <g>
+          <text x="360" y="197" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="700">
+            שלב 2 · התפשטות א&apos; (Propagation)
           </text>
 
-          <text x="70" y="240" fontSize="17" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
-          <line x1="90" y1="235" x2="175" y2="235" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="195" y="240" fontSize="17" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">H</text>
-          <circle cx="165" cy="227" r="2.5" fill={MECH_COLORS.charge} />
-          <text x="270" y="240" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
-          <circle cx="258" cy="220" r="2.5" fill={MECH_COLORS.charge} />
-          <path d="M165,227 Q205,187 250,218" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-radical)" />
-          <text x="180" y="270" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">R-H + •X</text>
+          <text x="68" y="248" fontSize="18" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+          <line x1="88" y1="242" x2="172" y2="242" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="192" y="248" fontSize="18" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">H</text>
+          <circle cx="162" cy="234" r="2.5" fill={MECH_COLORS.charge} />
+          <text x="264" y="248" fontSize="18" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+          <circle cx="252" cy="227" r="2.5" fill={MECH_COLORS.charge} />
 
-          <line x1="330" y1="235" x2="400" y2="235" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-radical-straight)" />
+          <path d="M162,234 Q202,193 248,225" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-radical)" />
 
-          <text x="460" y="240" fontSize="17" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
-          <circle cx="478" cy="222" r="2.5" fill={MECH_COLORS.charge} />
-          <text x="545" y="240" fontSize="17" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">H</text>
-          <line x1="560" y1="235" x2="625" y2="235" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="645" y="240" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
-          <text x="555" y="270" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">•R + H-X</text>
+          <ChemLatexSvg tex="\ce{R-H}" x={95} y={278} fontSize={13} color={MECH_COLORS.atom} anchor="middle" width={62} />
+          <text x="152" y="283" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">+</text>
+          <circle cx="176" cy="277" r="2.5" fill={MECH_COLORS.charge} />
+          <text x="188" y="283" fontSize="13" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+
+          <line x1="330" y1="242" x2="400" y2="242" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-radical-straight)" />
+
+          <text x="458" y="248" fontSize="18" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+          <circle cx="476" cy="230" r="2.5" fill={MECH_COLORS.charge} />
+          <text x="540" y="248" fontSize="18" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">H</text>
+          <line x1="555" y1="242" x2="615" y2="242" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="630" y="248" fontSize="18" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+
+          <circle cx="476" cy="277" r="2.5" fill={MECH_COLORS.charge} />
+          <text x="488" y="283" fontSize="13" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+          <text x="510" y="283" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">+</text>
+          <ChemLatexSvg tex="\ce{H-X}" x={568} y={278} fontSize={13} color={MECH_COLORS.atom} anchor="middle" width={62} />
         </g>
 
-        <line x1="20" y1="300" x2="700" y2="300" stroke={MECH_COLORS.bond} strokeWidth="1" strokeDasharray="4 4" />
+        <line x1="20" y1="304" x2="700" y2="304" stroke={MECH_COLORS.bond} strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
 
-        {/* ===== שלב 3: התפשטות ב' - תקיפת X2 ===== */}
-        <g fontFamily="inherit">
-          <text x="360" y="335" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="700">
-            שלב 3 - התפשטות ב' (Propagation): R• + X-X → R-X + X•
+        {/* ===== שלב 3: התפשטות ב' - תקיפת X-X ===== */}
+        <g>
+          <text x="360" y="338" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="700">
+            שלב 3 · התפשטות ב&apos; (Propagation)
           </text>
 
-          <text x="70" y="380" fontSize="17" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
-          <circle cx="88" cy="362" r="2.5" fill={MECH_COLORS.charge} />
-          <text x="180" y="380" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
-          <line x1="195" y1="375" x2="235" y2="375" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="250" y="380" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
-          <circle cx="208" cy="375" r="2.5" fill={MECH_COLORS.charge} />
-          <path d="M88,362 Q135,340 172,368" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-radical)" />
-          <path d="M208,375 Q222,350 245,362" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-radical)" />
-          <text x="160" y="410" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">•R + X-X</text>
+          <text x="68" y="388" fontSize="18" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+          <circle cx="86" cy="370" r="2.5" fill={MECH_COLORS.charge} />
+          <text x="182" y="388" fontSize="18" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+          <line x1="198" y1="382" x2="238" y2="382" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="254" y="388" fontSize="18" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+          <circle cx="212" cy="382" r="2.5" fill={MECH_COLORS.charge} />
 
-          <line x1="330" y1="375" x2="400" y2="375" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-radical-straight)" />
+          <path d="M86,370 Q136,346 174,376" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-radical)" />
+          <path d="M212,382 Q226,356 250,368" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-radical)" />
 
-          <text x="460" y="380" fontSize="17" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
-          <line x1="475" y1="375" x2="515" y2="375" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="530" y="380" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
-          <text x="620" y="380" fontSize="17" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
-          <circle cx="612" cy="362" r="2.5" fill={MECH_COLORS.charge} />
-          <text x="545" y="410" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">R-X + •X (חוזר לשלב 2)</text>
+          <circle cx="72" cy="418" r="2.5" fill={MECH_COLORS.charge} />
+          <text x="84" y="424" fontSize="13" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+          <text x="106" y="424" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">+</text>
+          <ChemLatexSvg tex="\ce{X2}" x={146} y={419} fontSize={13} color={MECH_COLORS.electrophileLeavingGroup} anchor="middle" width={44} />
+
+          <line x1="330" y1="382" x2="400" y2="382" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-radical-straight)" />
+
+          <text x="458" y="388" fontSize="18" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+          <line x1="473" y1="382" x2="513" y2="382" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="528" y="388" fontSize="18" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+          <text x="606" y="388" fontSize="18" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+          <circle cx="598" cy="370" r="2.5" fill={MECH_COLORS.charge} />
+
+          <ChemLatexSvg tex="\ce{R-X}" x={500} y={419} fontSize={13} color={MECH_COLORS.atom} anchor="middle" width={58} />
+          <text x="556" y="424" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">+</text>
+          <circle cx="574" cy="418" r="2.5" fill={MECH_COLORS.charge} />
+          <text x="586" y="424" fontSize="13" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">X</text>
+          <text x="606" y="424" fontSize="11" fill="#9ca3af" textAnchor="start">(חוזר לשלב 2)</text>
         </g>
 
-        <line x1="20" y1="440" x2="700" y2="440" stroke={MECH_COLORS.bond} strokeWidth="1" strokeDasharray="4 4" />
+        <line x1="20" y1="448" x2="700" y2="448" stroke={MECH_COLORS.bond} strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
 
         {/* ===== שלב 4: סיום ===== */}
-        <g fontFamily="inherit">
-          <text x="360" y="475" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="700">
-            שלב 4 - סיום (Termination): שני רדיקלים כלשהם מתלכדים
+        <g>
+          <text x="360" y="482" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="700">
+            שלב 4 · סיום (Termination)
           </text>
 
-          <text x="140" y="520" fontSize="17" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
-          <circle cx="158" cy="502" r="2.5" fill={MECH_COLORS.charge} />
-          <text x="230" y="520" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">+</text>
-          <text x="300" y="520" fontSize="17" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
-          <circle cx="282" cy="502" r="2.5" fill={MECH_COLORS.charge} />
-          <path d="M158,502 Q220,478 282,502" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-radical)" />
+          <text x="138" y="530" fontSize="18" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+          <circle cx="156" cy="512" r="2.5" fill={MECH_COLORS.charge} />
+          <text x="228" y="530" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">+</text>
+          <text x="298" y="530" fontSize="18" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+          <circle cx="280" cy="512" r="2.5" fill={MECH_COLORS.charge} />
 
-          <line x1="360" y1="515" x2="420" y2="515" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-radical-straight)" />
+          <path d="M156,512 Q217,486 280,512" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-radical)" />
 
-          <text x="480" y="520" fontSize="17" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
-          <line x1="495" y1="515" x2="545" y2="515" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="560" y="520" fontSize="17" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
-          <text x="520" y="550" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">קשר קוולנטי יציב - השרשרת נעצרת</text>
-          <text x="520" y="568" fontSize="11" fill="#9ca3af" textAnchor="middle">(באותו אופן: X+X או R+X מתלכדים)</text>
+          <line x1="360" y1="525" x2="420" y2="525" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-radical-straight)" />
+
+          <text x="478" y="530" fontSize="18" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+          <line x1="493" y1="525" x2="543" y2="525" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="558" y="530" fontSize="18" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+
+          <ChemLatexSvg tex="\ce{R-R}" x={518} y={562} fontSize={13} color={MECH_COLORS.atom} anchor="middle" width={58} />
+          <text x="518" y="586" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">קשר קוולנטי יציב - השרשרת נעצרת</text>
+          <text x="518" y="606" fontSize="11" fill="#9ca3af" textAnchor="middle">(באותו אופן: גם X+X או R+X עשויים להתלכד)</text>
         </g>
       </svg>
     </MechanismArtFrame>

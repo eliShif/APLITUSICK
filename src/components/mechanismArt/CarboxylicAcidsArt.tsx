@@ -1,112 +1,125 @@
 import { MechanismArtFrame, MECH_COLORS } from "./MechanismArtFrame";
+import { ChemLatexSvg } from "@/components/ChemLatex";
+import { WedgeBond, DashBond } from "./BondPrimitives";
 
+/**
+ * מנגנון תוספת-אלימינציה נוקלאופילית אצילית (Nucleophilic Acyl Substitution), בסגנון
+ * הייחוס של NucleophilicSubstitutionArt.tsx: שלושה פאנלים, טריז/מקווקוו תלת-ממדי אמיתי
+ * ו-ChemLatexSvg (KaTeX+mhchem) לכל תווית כימית. בשונה מ-SN2, הפאנל האמצעי כאן אינו מצב
+ * מעבר חולף אלא תווך ביניים טטראהדרלי אמיתי (בר-בידוד עקרונית) - לכן הוא מצויר כפאנל רגיל,
+ * בלי BracketPair. זהו המקום היחיד בתרשים שבו הפחמן המרכזי הוא sp3 אמיתי עם ארבעה
+ * תחליפים שונים (R, Nu, LG, O⁻) - סטריאומרכז של ממש - ולכן שני מהקשרים שלו מצוירים כטריז
+ * (Nu, לכיוון הצופה) ומקווקוו (O⁻, מהצופה והלאה); בפאנלים 1 ו-3 הפחמן הוא sp2 שטוח
+ * (קרבוניל אמיתי, קשר π כפול) ולכן אין שם טריז/מקווקוו - זה נכון כימית.
+ */
 export function CarboxylicAcidsArt() {
   return (
     <MechanismArtFrame
       title="תוספת-אלימינציה נוקלאופילית אצילית - שונה מתוספת פשוטה!"
       note="החץ הכחול: זוג האלקטרונים של הנוקלאופיל תוקף את פחמן הקרבוניל. החץ השחור העליון: הקשר π של C=O עובר לחמצן ויוצר תווך ביניים טטראהדרלי טעון שלילית (O⁻). בשלב השני (מימין): זוג האלקטרונים על החמצן חוזר ויוצר מחדש C=O, וזוג האלקטרונים של הקשר C-LG עובר אל ה-LG שעוזב (ענבר). בשונה מתוספת פשוטה לאלדהיד/קטון - כאן LG טוב עוזב ומחזיר את הקרבוניל, כך שהנגזרת המקורית מוחלפת בפועל בנוקלאופיל החדש (סובסטיטוציה אמיתית, לא רק תוספת)."
     >
-      <svg viewBox="0 0 980 220" className="w-full h-auto" style={{ minWidth: 760 }}>
+      <svg viewBox="0 0 1040 300" className="w-full h-auto" style={{ minWidth: 820 }}>
         <defs>
           <marker id="arrow-acyl" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill={MECH_COLORS.arrow} />
           </marker>
         </defs>
 
-        {/* ===== פאנל 1: מגיבים - שלב תוספת ===== */}
-        <g fontFamily="inherit">
+        {/* ===== פאנל 1: מגיבים - קרבוניל שטוח (sp2) + נוקלאופיל מתקרב ===== */}
+        <g>
           {/* R group */}
-          <line x1="95" y1="108" x2="60" y2="85" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="48" y="82" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+          <line x1="160" y1="150" x2="120" y2="110" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="105" y="98" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
 
           {/* carbonyl carbon */}
-          <circle cx="95" cy="108" r="4" fill={MECH_COLORS.atom} />
+          <circle cx="160" cy="150" r="4" fill={MECH_COLORS.atom} />
 
           {/* C=O double bond, going up */}
-          <line x1="98" y1="102" x2="98" y2="55" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <line x1="92" y1="102" x2="92" y2="55" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="95" y="42" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">O</text>
+          <line x1="156" y1="145" x2="156" y2="90" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <line x1="164" y1="145" x2="164" y2="90" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="160" y="79" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">O</text>
 
           {/* C-LG bond */}
-          <line x1="99" y1="108" x2="150" y2="108" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="172" y="113" fontSize="16" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">LG</text>
+          <line x1="164" y1="150" x2="214" y2="150" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <ChemLatexSvg tex="\ce{LG}" x={246} y={152} fontSize={17} color={MECH_COLORS.electrophileLeavingGroup} />
 
-          {/* Nucleophile approaching from below */}
-          <text x="55" y="165" fontSize="16" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">Nu</text>
-          <text x="70" y="150" fontSize="12" fill={MECH_COLORS.nucleophile} textAnchor="middle">⁻</text>
-          <circle cx="76" cy="147" r="2" fill={MECH_COLORS.nucleophile} />
-          <circle cx="82" cy="147" r="2" fill={MECH_COLORS.nucleophile} />
+          {/* Nu^- approaching from below-left, with lone pair */}
+          <ChemLatexSvg tex="\ce{Nu^-}" x={55} y={210} fontSize={17} color={MECH_COLORS.nucleophile} />
+          <circle cx="78" cy="189" r="2" fill={MECH_COLORS.nucleophile} />
+          <circle cx="84" cy="189" r="2" fill={MECH_COLORS.nucleophile} />
 
           {/* arrow 1: Nu lone pair -> carbonyl carbon (blue) */}
-          <path d="M79,144 Q88,125 94,112" fill="none" stroke={MECH_COLORS.nucleophile} strokeWidth="2.25" markerEnd="url(#arrow-acyl)" />
+          <path d="M81,186 Q110,164 152,156" fill="none" stroke={MECH_COLORS.nucleophile} strokeWidth="2.25" markerEnd="url(#arrow-acyl)" />
 
-          {/* arrow 2: C=O pi bond -> O (black), curving from the double bond to the O */}
-          <path d="M96,80 Q112,65 100,50" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-acyl)" />
+          {/* arrow 2: C=O pi bond -> O, becomes lone pair on O (black) */}
+          <path d="M162,108 Q184,86 165,77" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-acyl)" />
 
-          <text x="105" y="195" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">מגיבים - שלב תוספת</text>
+          <text x="160" y="258" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
+            מגיבים - שלב תוספת
+          </text>
         </g>
 
-        {/* arrow panel1 -> panel2 */}
-        <line x1="230" y1="108" x2="290" y2="108" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-acyl)" />
+        <line x1="268" y1="150" x2="326" y2="150" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-acyl)" />
 
-        {/* ===== פאנל 2: תווך ביניים טטראהדרלי ===== */}
-        <g fontFamily="inherit">
-          {/* R group */}
-          <line x1="460" y1="108" x2="425" y2="80" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="413" y="77" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+        {/* ===== פאנל 2: תווך ביניים טטראהדרלי - סטריאומרכז אמיתי (sp3) ===== */}
+        <g>
+          {/* R group - in-plane bond */}
+          <line x1="520" y1="150" x2="480" y2="110" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="465" y="98" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
 
-          {/* tetrahedral carbon */}
-          <circle cx="460" cy="108" r="4" fill={MECH_COLORS.atom} />
+          {/* LG - in-plane bond */}
+          <line x1="520" y1="150" x2="560" y2="110" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <ChemLatexSvg tex="\ce{LG}" x={594} y={98} fontSize={16} color={MECH_COLORS.electrophileLeavingGroup} />
 
-          {/* C-O(-) single bond, up */}
-          <line x1="460" y1="103" x2="460" y2="58" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="460" y="45" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">O</text>
-          <text x="475" y="40" fontSize="13" fill={MECH_COLORS.charge} textAnchor="middle">⁻</text>
+          {/* Nu - wedge bond, toward the viewer */}
+          <WedgeBond x1={520} y1={150} x2={478} y2={194} color={MECH_COLORS.bond} />
+          <ChemLatexSvg tex="\ce{Nu}" x={446} y={208} fontSize={16} color={MECH_COLORS.nucleophile} />
 
-          {/* C-LG bond */}
-          <line x1="464" y1="108" x2="515" y2="108" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="537" y="113" fontSize="16" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">LG</text>
+          {/* O(-) - dash bond, away from the viewer */}
+          <DashBond x1={520} y1={150} x2={562} y2={194} color={MECH_COLORS.bond} />
+          <ChemLatexSvg tex="O^{-}" x={594} y={210} fontSize={16} color={MECH_COLORS.charge} />
 
-          {/* C-Nu bond, down-left */}
-          <line x1="457" y1="112" x2="425" y2="140" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="410" y="155" fontSize="16" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">Nu</text>
+          <circle cx="520" cy="150" r="4" fill={MECH_COLORS.atom} />
 
-          <text x="470" y="185" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">תווך ביניים טטראהדרלי</text>
-          <text x="470" y="202" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">(טעון שלילי)</text>
+          {/* arrow 3: O(-) lone pair -> reforms the C=O pi bond (black) */}
+          <path d="M559,187 Q592,150 528,143" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-acyl)" />
+          {/* arrow 4: C-LG bond breaks, electrons leave with LG (amber) */}
+          <path d="M547,120 Q574,100 589,91" fill="none" stroke={MECH_COLORS.electrophileLeavingGroup} strokeWidth="2.25" markerEnd="url(#arrow-acyl)" />
 
-          {/* arrows for step 2, drawn within panel 2, pointing toward panel 3 */}
-          {/* arrow 3: O(-) lone pair -> reforms C=O */}
-          <path d="M470,55 Q495,50 480,90" fill="none" stroke={MECH_COLORS.arrow} strokeWidth="2.25" markerEnd="url(#arrow-acyl)" />
-          {/* arrow 4: C-LG bond -> LG leaves */}
-          <path d="M490,108 Q515,100 530,105" fill="none" stroke={MECH_COLORS.electrophileLeavingGroup} strokeWidth="2.25" markerEnd="url(#arrow-acyl)" />
+          <text x="520" y="250" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
+            תווך ביניים טטראהדרלי
+          </text>
+          <text x="520" y="267" fontSize="12" fill={MECH_COLORS.atom} textAnchor="middle">
+            (טעון שלילי)
+          </text>
         </g>
 
-        {/* arrow panel2 -> panel3 */}
-        <line x1="600" y1="108" x2="660" y2="108" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-acyl)" />
+        <line x1="636" y1="150" x2="696" y2="150" stroke={MECH_COLORS.arrow} strokeWidth="2.5" markerEnd="url(#arrow-acyl)" />
 
-        {/* ===== פאנל 3: תוצרים - שלב אלימינציה ===== */}
-        <g fontFamily="inherit">
+        {/* ===== פאנל 3: תוצרים - קרבוניל חדש שטוח (sp2 שוב) + LG חופשי ===== */}
+        <g>
           {/* R group */}
-          <line x1="800" y1="108" x2="765" y2="85" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="753" y="82" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
+          <line x1="860" y1="150" x2="820" y2="110" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="805" y="98" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">R</text>
 
           {/* carbonyl carbon */}
-          <circle cx="800" cy="108" r="4" fill={MECH_COLORS.atom} />
+          <circle cx="860" cy="150" r="4" fill={MECH_COLORS.atom} />
 
-          {/* new C=O double bond */}
-          <line x1="803" y1="102" x2="803" y2="55" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <line x1="797" y1="102" x2="797" y2="55" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="800" y="42" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">O</text>
+          {/* new C=O double bond, reformed */}
+          <line x1="856" y1="145" x2="856" y2="90" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <line x1="864" y1="145" x2="864" y2="90" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <text x="860" y="79" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">O</text>
 
-          {/* C-Nu bond */}
-          <line x1="804" y1="108" x2="850" y2="108" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="872" y="113" fontSize="16" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">Nu</text>
+          {/* C-Nu bond, now a real bond (no charge) */}
+          <line x1="864" y1="150" x2="914" y2="150" stroke={MECH_COLORS.bond} strokeWidth="2" />
+          <ChemLatexSvg tex="\ce{Nu}" x={946} y={152} fontSize={17} color={MECH_COLORS.nucleophile} />
 
-          {/* departed LG, separated to the side */}
-          <text x="900" y="165" fontSize="16" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">LG</text>
-          <text x="920" y="150" fontSize="13" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">⁻</text>
+          {/* LG(-), departed and separated - free anion */}
+          <ChemLatexSvg tex="\ce{LG^-}" x={900} y={215} fontSize={17} color={MECH_COLORS.electrophileLeavingGroup} />
 
-          <text x="850" y="195" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">תוצרים - נגזרת חדשה</text>
+          <text x="860" y="258" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
+            תוצרים - נגזרת חדשה
+          </text>
         </g>
       </svg>
     </MechanismArtFrame>

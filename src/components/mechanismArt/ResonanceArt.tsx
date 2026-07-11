@@ -1,4 +1,5 @@
 import { MechanismArtFrame, MECH_COLORS } from "./MechanismArtFrame";
+import { ChemLatexSvg } from "@/components/ChemLatex";
 
 /**
  * תרשים רזוננס (Resonance) - יון קרבוקסילט (RCOO⁻).
@@ -39,10 +40,9 @@ export function ResonanceArt() {
           <circle cx="188" cy="36" r="1.6" fill={MECH_COLORS.atom} />
           <circle cx="198" cy="36" r="1.6" fill={MECH_COLORS.atom} />
 
-          {/* C-O תחתון - קשר יחיד, O עם מטען שלילי וזוג בודד */}
+          {/* C-O תחתון - קשר יחיד, O עם מטען שלילי וזוג בודד (תווית+מטען דרך KaTeX, כמו O^{-} ב-CarboxylicAcidsArt) */}
           <line x1="130" y1="120" x2="195" y2="180" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="205" y="192" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">O</text>
-          <text x="218" y="183" fontSize="13" fontWeight="700" fill={MECH_COLORS.charge} textAnchor="middle">⁻</text>
+          <ChemLatexSvg tex="O^{-}" x={205} y={188} fontSize={15} color={MECH_COLORS.charge} />
           <circle cx="209" cy="168" r="1.6" fill={MECH_COLORS.charge} />
           <circle cx="217" cy="174" r="1.6" fill={MECH_COLORS.charge} />
 
@@ -71,10 +71,9 @@ export function ResonanceArt() {
           <circle cx="130" cy="120" r="4" fill={MECH_COLORS.atom} />
           <text x="130" y="140" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">C</text>
 
-          {/* C-O עליון - עכשיו קשר יחיד, O עם מטען שלילי וזוג בודד */}
+          {/* C-O עליון - עכשיו קשר יחיד, O עם מטען שלילי וזוג בודד (תווית+מטען דרך KaTeX) */}
           <line x1="130" y1="120" x2="195" y2="60" stroke={MECH_COLORS.bond} strokeWidth="2" />
-          <text x="205" y="52" fontSize="15" fill={MECH_COLORS.atom} textAnchor="middle">O</text>
-          <text x="218" y="43" fontSize="13" fontWeight="700" fill={MECH_COLORS.charge} textAnchor="middle">⁻</text>
+          <ChemLatexSvg tex="O^{-}" x={205} y={48} fontSize={15} color={MECH_COLORS.charge} />
           <circle cx="209" cy="72" r="1.6" fill={MECH_COLORS.charge} />
           <circle cx="217" cy="66" r="1.6" fill={MECH_COLORS.charge} />
 

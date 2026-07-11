@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SN2_MECHANISM_3D, sn2StepCaption, SN2_ATOM_INDEX, type Mechanism3DFrame } from "@/content/mechanisms3d/sn2";
+import { captionForT, type Mechanism3DFrame, type Mechanism3DMeta } from "@/content/mechanisms3d/schema";
 
 interface ScreenPt {
   x: number;
@@ -9,9 +9,9 @@ interface ScreenPt {
 }
 
 interface GLViewerLike {
-  clear: () => void;
-  addModel: (data: string, format: string) => void;
+  addModelsAsFrames: (data: string, format: string) => void;
   setStyle: (sel: object, style: object) => void;
+  setFrame: (i: number) => void;
   zoomTo: () => void;
   render: () => void;
   getView: () => number[];
@@ -19,42 +19,71 @@ interface GLViewerLike {
   modelToScreen: (coords: ScreenPt[]) => ScreenPt[];
 }
 
-function frameToXyz(frame: Mechanism3DFrame): string {
-  const lines = [String(frame.atoms.length), "sn2"];
+function frameToXyzBlock(frame: Mechanism3DFrame, title: string): string {
+  const lines = [String(frame.atoms.length), title];
   for (const a of frame.atoms) {
     lines.push(`${a.el} ${a.pos[0].toFixed(4)} ${a.pos[1].toFixed(4)} ${a.pos[2].toFixed(4)}`);
   }
   return lines.join("\n");
 }
 
-const FRAME_MS = 45;
+/** דעיכת אטימות רכה בקצוות טווח הפעילות של חץ, כדי שלא "יקפוץ" פנימה/החוצה בפתאומיות. */
+function arrowOpacity(t: number, from: number, to: number): number {
+  const fade = 0.12;
+  if (t < from - fade || t > to + fade) return 0.12;
+  if (t < from) return 0.12 + (0.88 * (t - (from - fade))) / fade;
+  if (t > to) return 1 - (0.88 * (t - to)) / fade;
+  return 1;
+}
+
+const PLAYBACK_MS = 3200;
 
 /**
- * סימולטור מנגנון תלת-ממדי - דוגמת ייחוס ל-SN2. מציג רצף פריימים אמיתיים (RDKit, ראו
- * src/content/mechanisms3d/sn2-frames.json) עם 3Dmol.js, ומצלמה נעולה בזווית קבועה בזמן
- * ניגון ("מצב צפייה") כדי שכתובת/חצים 2D (מחושבים דרך viewer.modelToScreen) יישארו מסונכרנים
- * למיקום האטומים על המסך. "מצב חקירה" עוצר את הניגון ומאפשר סיבוב חופשי בעכבר, בלי overlay.
+ * סימולטור מנגנון תלת-ממדי גנרי - מונע נתונים (Mechanism3DMeta), לשימוש חוזר בכל המנגנונים.
+ * כל הפריימים נטענים פעם אחת כ-multi-frame model (viewer.addModelsAsFrames) ומוצגים דרך
+ * viewer.setFrame(i) - זול בהרבה מ-clear+addModel בכל טיק, ומאפשר ניגון חלק בקצב אמיתי
+ * (requestAnimationFrame לפי זמן שחלף, לא setInterval קבוע). המצלמה נעולה בזווית מתוכננת
+ * בזמן ניגון ("מצב צפייה") כדי שחצים/תוויות 2D (מחושבים דרך viewer.modelToScreen) יישארו
+ * מסונכרנים למיקום האטומים. "מצב חקירה" עוצר את הניגון ומאפשר סיבוב חופשי בעכבר, בלי overlay.
  */
-export function MechanismSimulator3D() {
-  const data = SN2_MECHANISM_3D;
+export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<GLViewerLike | null>(null);
   const fixedViewRef = useRef<number[] | null>(null);
+  const rectRef = useRef<DOMRect | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const playStartRef = useRef<number>(0);
+
   const [ready, setReady] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [exploring, setExploring] = useState(false);
-  const [overlay, setOverlay] = useState<{ c: ScreenPt; lg: ScreenPt; nu: ScreenPt } | null>(null);
+  const [screenPts, setScreenPts] = useState<Map<number, ScreenPt> | null>(null);
+
+  // כל האטומים שצריך למקם על המסך: אלו שיש להם תווית (roles) וגם כל קצה חץ (arrows) -
+  // חץ יכול להצביע לאטום "טכני" (כמו הפחמן המרכזי) שאין לו תווית משלו.
+  const trackedIndicesRef = useRef<number[]>([]);
+  trackedIndicesRef.current = Array.from(
+    new Set([...mechanism.roles.map((r) => r.index), ...mechanism.arrows.flatMap((a) => [a.fromIndex, a.toIndex])])
+  );
 
   useEffect(() => {
     let cancelled = false;
+    setReady(false);
+    setFrameIndex(0);
+    setPlaying(false);
+    setExploring(false);
+    fixedViewRef.current = null;
+    rectRef.current = null;
+
     async function init() {
       const $3Dmol = await import("3dmol");
       if (cancelled || !containerRef.current) return;
       const viewer = $3Dmol.createViewer(containerRef.current, {
         backgroundColor: "0xffffff",
       }) as unknown as GLViewerLike;
-      viewer.addModel(frameToXyz(data.frames[0]), "xyz");
+      const allFrames = mechanism.frames.map((f) => frameToXyzBlock(f, mechanism.slug)).join("\n");
+      viewer.addModelsAsFrames(allFrames, "xyz");
       viewer.setStyle({}, { stick: { radius: 0.12 }, sphere: { scale: 0.28 } });
       viewer.zoomTo();
       viewer.render();
@@ -66,40 +95,39 @@ export function MechanismSimulator3D() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mechanism]);
 
   const renderFrame = useCallback(
     (i: number, keepExploreView: boolean) => {
       const viewer = viewerRef.current;
       const container = containerRef.current;
       if (!viewer || !container) return;
-      const frame = data.frames[i];
-      viewer.clear();
-      viewer.addModel(frameToXyz(frame), "xyz");
-      viewer.setStyle({}, { stick: { radius: 0.12 }, sphere: { scale: 0.28 } });
+      const frame = mechanism.frames[i];
+      viewer.setFrame(i);
       if (fixedViewRef.current && !keepExploreView) viewer.setView(fixedViewRef.current);
       viewer.render();
 
       if (keepExploreView) {
-        setOverlay(null);
+        setScreenPts(null);
         return;
       }
-      const atoms = [
-        frame.atoms[SN2_ATOM_INDEX.C],
-        frame.atoms[SN2_ATOM_INDEX.LG],
-        frame.atoms[SN2_ATOM_INDEX.NU],
-      ];
-      const pts = atoms.map((a) => ({ x: a.pos[0], y: a.pos[1], z: a.pos[2] }));
+      if (!rectRef.current) rectRef.current = container.getBoundingClientRect();
+      const rect = rectRef.current;
+      const indices = trackedIndicesRef.current;
+      const pts = indices.map((idx) => {
+        const a = frame.atoms[idx];
+        return { x: a.pos[0], y: a.pos[1], z: a.pos[2] };
+      });
       const screen = viewer.modelToScreen(pts as unknown as ScreenPt[]);
-      const rect = container.getBoundingClientRect();
       const toLocal = (p: ScreenPt): ScreenPt => ({
         x: p.x - rect.left - window.scrollX,
         y: p.y - rect.top - window.scrollY,
       });
-      setOverlay({ c: toLocal(screen[0]), lg: toLocal(screen[1]), nu: toLocal(screen[2]) });
+      const map = new Map<number, ScreenPt>();
+      indices.forEach((idx, i) => map.set(idx, toLocal(screen[i])));
+      setScreenPts(map);
     },
-    [data.frames]
+    [mechanism]
   );
 
   useEffect(() => {
@@ -109,27 +137,36 @@ export function MechanismSimulator3D() {
 
   useEffect(() => {
     if (!playing || exploring) return;
-    const id = setInterval(() => {
-      setFrameIndex((i) => {
-        if (i >= data.frames.length - 1) {
-          setPlaying(false);
-          return i;
-        }
-        return i + 1;
-      });
-    }, FRAME_MS);
-    return () => clearInterval(id);
-  }, [playing, exploring, data.frames.length]);
+    rectRef.current = containerRef.current?.getBoundingClientRect() ?? null;
+    const totalFrames = mechanism.frames.length;
+    const startFrame = frameIndex;
+    playStartRef.current = performance.now();
+    const remainingMs = ((totalFrames - 1 - startFrame) / (totalFrames - 1)) * PLAYBACK_MS;
 
-  const t = data.frames[frameIndex].t;
-  const nuCharge = t < 0.06 ? "−" : null; // ⁻ על ה-Nu רק כשעדיין לא נוצר קשר
-  const lgCharge = t > 0.94 ? "−" : null; // ⁻ על ה-LG רק אחרי שהקשר נותק לגמרי
-  const showDelta = t >= 0.06 && t <= 0.94;
+    function tick(now: number) {
+      const elapsed = now - playStartRef.current;
+      const progress = remainingMs > 0 ? Math.min(1, elapsed / remainingMs) : 1;
+      const nextIndex = Math.round(startFrame + progress * (totalFrames - 1 - startFrame));
+      setFrameIndex(nextIndex);
+      if (progress >= 1) {
+        setPlaying(false);
+        return;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    }
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, exploring, mechanism]);
+
+  const t = mechanism.frames[frameIndex].t;
 
   return (
     <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900 overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 border-b border-black/10 dark:border-white/10 text-sm">
-        <div className="font-semibold">{data.title}</div>
+        <div className="font-semibold">{mechanism.title}</div>
         <button
           onClick={() => {
             setPlaying(false);
@@ -149,47 +186,53 @@ export function MechanismSimulator3D() {
             טוען מודל תלת-ממדי…
           </div>
         )}
-        {overlay && !exploring && (
-          <svg className="absolute inset-0 pointer-events-none" width="100%" height="100%">
+        {screenPts && !exploring && (
+          <svg className="absolute inset-0 pointer-events-none z-10" width="100%" height="100%">
             <defs>
-              <marker id="arrow-3d" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <marker id="arrow-3d-pair" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M0,0 L10,5 L0,10 z" fill="#111827" />
               </marker>
+              <marker id="arrow-3d-fishhook" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,5 L10,5 L0,0 z" fill="#111827" />
+              </marker>
             </defs>
-            {/* חץ אלקטרונים: זוג בודד של Nu אל C */}
-            <path
-              d={`M ${overlay.nu.x} ${overlay.nu.y - 14} Q ${(overlay.nu.x + overlay.c.x) / 2} ${Math.min(overlay.nu.y, overlay.c.y) - 30} ${overlay.c.x - 10} ${overlay.c.y}`}
-              fill="none"
-              stroke="#1d4ed8"
-              strokeWidth={2}
-              markerEnd="url(#arrow-3d)"
-              opacity={t < 0.6 ? 1 : 0.15}
-            />
-            {/* חץ אלקטרונים: קשר C-LG אל LG */}
-            <path
-              d={`M ${overlay.c.x + 10} ${overlay.c.y} Q ${(overlay.c.x + overlay.lg.x) / 2} ${Math.min(overlay.lg.y, overlay.c.y) - 30} ${overlay.lg.x} ${overlay.lg.y - 14}`}
-              fill="none"
-              stroke="#b45309"
-              strokeWidth={2}
-              markerEnd="url(#arrow-3d)"
-              opacity={t > 0.4 ? 1 : 0.15}
-            />
-            {showDelta && (
-              <text x={overlay.nu.x} y={overlay.nu.y - 32} textAnchor="middle" fontSize={11} fill="#1d4ed8" style={{ direction: "ltr" }}>
-                δ−
-              </text>
-            )}
-            <text x={overlay.nu.x} y={overlay.nu.y - 20} textAnchor="middle" fontSize={14} fontWeight={700} fill="#1d4ed8" style={{ direction: "ltr" }}>
-              Nu{nuCharge}
-            </text>
-            {showDelta && (
-              <text x={overlay.lg.x} y={overlay.lg.y - 32} textAnchor="middle" fontSize={11} fill="#b45309" style={{ direction: "ltr" }}>
-                δ−
-              </text>
-            )}
-            <text x={overlay.lg.x} y={overlay.lg.y - 20} textAnchor="middle" fontSize={14} fontWeight={700} fill="#b45309" style={{ direction: "ltr" }}>
-              LG{lgCharge}
-            </text>
+            {mechanism.arrows.map((arrow, i) => {
+              const from = screenPts.get(arrow.fromIndex);
+              const to = screenPts.get(arrow.toIndex);
+              if (!from || !to) return null;
+              const midX = (from.x + to.x) / 2;
+              const midY = Math.min(from.y, to.y) - 30;
+              return (
+                <path
+                  key={i}
+                  d={`M ${from.x} ${from.y - 12} Q ${midX} ${midY} ${to.x} ${to.y - 12}`}
+                  fill="none"
+                  stroke={arrow.color}
+                  strokeWidth={2}
+                  markerEnd={`url(#arrow-3d-${arrow.style === "fishhook" ? "fishhook" : "pair"})`}
+                  opacity={arrowOpacity(t, arrow.activeFrom, arrow.activeTo)}
+                />
+              );
+            })}
+            {mechanism.roles.map((role, i) => {
+              const p = screenPts.get(role.index);
+              if (!p) return null;
+              const charge = role.chargeWindows?.find((w) => t >= w.from && t <= w.to)?.charge ?? null;
+              const showDelta = role.deltaWindow && t >= role.deltaWindow.from && t <= role.deltaWindow.to;
+              return (
+                <g key={i}>
+                  {showDelta && (
+                    <text x={p.x} y={p.y - 32} textAnchor="middle" fontSize={11} fill={role.color} style={{ direction: "ltr" }}>
+                      δ{role.deltaWindow!.sign}
+                    </text>
+                  )}
+                  <text x={p.x} y={p.y - 20} textAnchor="middle" fontSize={14} fontWeight={700} fill={role.color} style={{ direction: "ltr" }}>
+                    {role.label}
+                    {charge}
+                  </text>
+                </g>
+              );
+            })}
           </svg>
         )}
         {exploring && (
@@ -200,11 +243,11 @@ export function MechanismSimulator3D() {
       </div>
 
       <div className="px-3 py-2 border-t border-black/10 dark:border-white/10">
-        <div className="text-xs text-neutral-500 mb-2 min-h-8">{sn2StepCaption(t)}</div>
+        <div className="text-xs text-neutral-500 mb-2 min-h-8">{captionForT(mechanism.captions, t)}</div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => {
-              if (frameIndex >= data.frames.length - 1) setFrameIndex(0);
+              if (frameIndex >= mechanism.frames.length - 1) setFrameIndex(0);
               setExploring(false);
               setPlaying((v) => !v);
             }}
@@ -215,7 +258,7 @@ export function MechanismSimulator3D() {
           <input
             type="range"
             min={0}
-            max={data.frames.length - 1}
+            max={mechanism.frames.length - 1}
             value={frameIndex}
             disabled={exploring}
             onChange={(e) => {

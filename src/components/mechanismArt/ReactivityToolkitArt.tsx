@@ -1,5 +1,12 @@
 import { MechanismArtFrame, MECH_COLORS } from "./MechanismArtFrame";
+import { ChemLatexSvg } from "@/components/ChemLatex";
 
+/**
+ * התבנית האוניברסלית והמופשטת: Nu תוקף E, LG פורש. שלב אחד, שני פאנלים
+ * (Nu⁻-E-LG מגיבים -> Nu-E תוצר + LG⁻). זהו התרשים המובהק ביותר באתר להצגת קונבנציית
+ * δ+/δ- (על E ועל LG), דרך ChemLatexSvg. מכיוון שזה תבנית מופשטת/כללית (E יכול להיות כל
+ * אטום, לאו דווקא מרכז סטריאוגני אמיתי) - אין טריז/מקווקוו כאן, רק קווי קשר רגילים.
+ */
 export function ReactivityToolkitArt() {
   return (
     <MechanismArtFrame
@@ -24,40 +31,31 @@ export function ReactivityToolkitArt() {
         {/* פאנל 1: מגיבים */}
         <g fontFamily="inherit">
           {/* זוג בודד ליד Nu */}
-          <circle cx="62" cy="88" r="2" fill={MECH_COLORS.nucleophile} />
-          <circle cx="68" cy="88" r="2" fill={MECH_COLORS.nucleophile} />
-          <text x="55" y="115" fontSize="19" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">
-            Nu
-          </text>
-          <text x="80" y="98" fontSize="14" fill={MECH_COLORS.nucleophile} textAnchor="middle">
-            ⁻
-          </text>
+          <circle cx="60" cy="88" r="2" fill={MECH_COLORS.nucleophile} />
+          <circle cx="66" cy="88" r="2" fill={MECH_COLORS.nucleophile} />
+          <ChemLatexSvg tex="\ce{Nu^-}" x={56} y={112} fontSize={19} color={MECH_COLORS.nucleophile} />
 
           {/* קו Nu - E */}
           <line x1="90" y1="110" x2="150" y2="110" stroke={MECH_COLORS.bond} strokeWidth="2" />
 
           {/* E עם δ+ */}
-          <text x="165" y="115" fontSize="19" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">
+          <text x="165" y="117" fontSize="19" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">
             E
           </text>
-          <text x="165" y="90" fontSize="14" fontWeight="700" fill={MECH_COLORS.charge} textAnchor="middle">
-            δ+
-          </text>
+          <ChemLatexSvg tex="\delta^+" x={165} y={84} fontSize={14} color={MECH_COLORS.charge} />
 
           {/* קו E - LG */}
           <line x1="180" y1="110" x2="240" y2="110" stroke={MECH_COLORS.bond} strokeWidth="2" />
 
           {/* LG עם δ- */}
-          <text x="258" y="115" fontSize="19" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">
+          <text x="260" y="117" fontSize="19" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">
             LG
           </text>
-          <text x="258" y="90" fontSize="14" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">
-            δ-
-          </text>
+          <ChemLatexSvg tex="\delta^-" x={260} y={84} fontSize={14} color={MECH_COLORS.electrophileLeavingGroup} />
 
           {/* חץ 1: מהזוג הבודד של Nu אל E */}
           <path
-            d="M70,85 Q115,68 150,100"
+            d="M68,85 Q115,68 150,100"
             fill="none"
             stroke={MECH_COLORS.arrow}
             strokeWidth="2.25"
@@ -92,21 +90,16 @@ export function ReactivityToolkitArt() {
         {/* פאנל 2: תוצרים */}
         <g fontFamily="inherit">
           {/* Nu-E מחוברים */}
-          <text x="470" y="115" fontSize="19" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">
+          <text x="470" y="117" fontSize="19" fontWeight="700" fill={MECH_COLORS.nucleophile} textAnchor="middle">
             Nu
           </text>
           <line x1="490" y1="110" x2="525" y2="110" stroke={MECH_COLORS.bond} strokeWidth="2.5" />
-          <text x="545" y="115" fontSize="19" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">
+          <text x="545" y="117" fontSize="19" fontWeight="700" fill={MECH_COLORS.atom} textAnchor="middle">
             E
           </text>
 
           {/* LG⁻ נפרד */}
-          <text x="650" y="115" fontSize="19" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">
-            LG
-          </text>
-          <text x="670" y="98" fontSize="14" fontWeight="700" fill={MECH_COLORS.electrophileLeavingGroup} textAnchor="middle">
-            ⁻
-          </text>
+          <ChemLatexSvg tex="\ce{LG^-}" x={655} y={112} fontSize={19} color={MECH_COLORS.electrophileLeavingGroup} />
 
           <text x="560" y="185" fontSize="13" fill={MECH_COLORS.atom} textAnchor="middle" fontWeight="600">
             תוצרים - קשר חדש נוצר, הקבוצה העוזבת פרשה
