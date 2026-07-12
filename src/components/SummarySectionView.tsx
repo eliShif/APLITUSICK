@@ -1,5 +1,6 @@
 import type { SummarySection } from "@/content/types";
 import { ReadAloudBar } from "@/components/ReadAloudBar";
+import { ChemText } from "@/components/ChemText";
 
 function sectionToSpeechText(section: SummarySection): string {
   const parts: string[] = [section.heading];
@@ -19,14 +20,14 @@ export function SummarySectionView({ section }: { section: SummarySection }) {
       <ReadAloudBar text={sectionToSpeechText(section)} />
       {section.paragraphs?.map((p, i) => (
         <p key={i} className="leading-relaxed text-neutral-700 dark:text-neutral-300">
-          {p}
+          <ChemText>{p}</ChemText>
         </p>
       ))}
       {section.bullets && section.bullets.length > 0 && (
         <ul className="list-disc pr-5 space-y-1 text-neutral-700 dark:text-neutral-300">
           {section.bullets.map((b, i) => (
             <li key={i} className="leading-relaxed">
-              {b}
+              <ChemText>{b}</ChemText>
             </li>
           ))}
         </ul>
@@ -37,11 +38,13 @@ export function SummarySectionView({ section }: { section: SummarySection }) {
           className="rounded-xl border-2 border-amber-400/60 bg-amber-50 dark:bg-amber-900/20 p-4"
         >
           <div className="font-extrabold tracking-tight text-amber-800 dark:text-amber-300 mb-2">
-            ⚡ {box.title}
+            ⚡ <ChemText>{box.title}</ChemText>
           </div>
           <ul className="list-disc pr-5 space-y-1 text-sm text-amber-900 dark:text-amber-200">
             {box.items.map((item, j) => (
-              <li key={j}>{item}</li>
+              <li key={j}>
+                <ChemText>{item}</ChemText>
+              </li>
             ))}
           </ul>
         </div>

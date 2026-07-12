@@ -5,6 +5,7 @@ import type { Molecule } from "@/content/types";
 import { SMILES_BY_CID } from "@/content/moleculeSmiles";
 import { MoleculeSkeletal } from "@/components/MoleculeSkeletal";
 import { ChemFormula } from "@/components/ChemLatex";
+import { ChemText } from "@/components/ChemText";
 
 type ViewerStyle = "stick" | "sphere" | "line";
 
@@ -156,7 +157,7 @@ export function Molecule3DViewer({ molecule }: { molecule: Molecule }) {
       </div>
       {molecule.caption && (
         <div className="px-3 py-2 text-xs text-neutral-500 border-t border-black/10 dark:border-white/10">
-          {molecule.caption}
+          <ChemText>{molecule.caption}</ChemText>
         </div>
       )}
     </div>

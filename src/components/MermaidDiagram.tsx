@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { ChemText } from "@/components/ChemText";
 
 export function MermaidDiagram({ chart, title, note }: { chart: string; title?: string; note?: string }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -44,7 +45,11 @@ export function MermaidDiagram({ chart, title, note }: { chart: string; title?: 
       ) : (
         <div className="overflow-x-auto flex justify-center [&_svg]:max-w-none" ref={ref} />
       )}
-      {note && <div className="text-xs text-neutral-500 mt-2">{note}</div>}
+      {note && (
+        <div className="text-xs text-neutral-500 mt-2">
+          <ChemText>{note}</ChemText>
+        </div>
+      )}
     </div>
   );
 }

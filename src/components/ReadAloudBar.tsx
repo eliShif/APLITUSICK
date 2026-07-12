@@ -2,11 +2,12 @@
 
 import { useMemo } from "react";
 import { useHebrewReadAloud } from "@/lib/useHebrewReadAloud";
+import { stripChemMarkers } from "@/components/ChemText";
 
 const RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
 
 function stripForSpeech(text: string): string {
-  return text
+  return stripChemMarkers(text)
     .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
     .replace(/\s+/g, " ")
     .trim();

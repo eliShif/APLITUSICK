@@ -32,3 +32,26 @@ h1, h2, h3 {
 * {
   scrollbar-width: thin;
 }
+
+/* נוסחה כימית בודדת (KaTeX+mhchem, ראו ChemicalFormula.tsx) - חייבת להישאר יחידה אחת:
+   אסור ש-"H2SO4" למשל יתפצל בין סוף שורה לתחילת הבאה. בתוך פסקה עברית ה-RTL הכללי נשמר,
+   רק הנוסחה עצמה מבודדת ל-LTR. */
+.chemical-formula {
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  unicode-bidi: isolate;
+  vertical-align: baseline;
+}
+
+/* תגובה כימית ארוכה (כמה מגיבים/חץ/תוצרים) - אותה בדידות RTL/LTR, אבל אם אין מספיק רוחב
+   עדיף גלילה אופקית קטנה בתוך התגובה עצמה על פני שבירה באמצע מולקולה או חץ. */
+.chemical-reaction {
+  display: inline-block;
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow-x: auto;
+  vertical-align: middle;
+}

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { QuizQuestion } from "@/content/types";
 import { shuffle, normalizeText } from "@/lib/shuffle";
+import { ChemText } from "@/components/ChemText";
 
 interface PreparedQuestion {
   q: QuizQuestion;
@@ -112,7 +113,9 @@ export function Quiz({ questions }: { questions: QuizQuestion[] }) {
       </div>
 
       <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900 p-5 space-y-4">
-        <div className="font-semibold leading-relaxed">{q.question}</div>
+        <div className="font-semibold leading-relaxed">
+          <ChemText>{q.question}</ChemText>
+        </div>
 
         {q.type === "mc" && (
           <div className="grid gap-2">
@@ -132,7 +135,7 @@ export function Quiz({ questions }: { questions: QuizQuestion[] }) {
                       : "border-black/10 dark:border-white/10 hover:border-emerald-500"
                   }`}
                 >
-                  {opt}
+                  <ChemText>{opt}</ChemText>
                 </button>
               );
             })}
@@ -180,7 +183,7 @@ export function Quiz({ questions }: { questions: QuizQuestion[] }) {
             )}
             {answered && (
               <div className="text-xs text-neutral-500">
-                תשובה מקובלת: {q.answers.join(" / ")}
+                תשובה מקובלת: <ChemText>{q.answers.join(" / ")}</ChemText>
               </div>
             )}
           </div>
@@ -205,7 +208,13 @@ export function Quiz({ questions }: { questions: QuizQuestion[] }) {
                 : "bg-rose-50 dark:bg-rose-900/30 text-rose-800 dark:text-rose-300"
             }`}
           >
-            {isCorrect ? "תשובה נכונה!" : "לא מדויק."} {q.explanation && <span> {q.explanation}</span>}
+            {isCorrect ? "תשובה נכונה!" : "לא מדויק."}{" "}
+            {q.explanation && (
+              <span>
+                {" "}
+                <ChemText>{q.explanation}</ChemText>
+              </span>
+            )}
             {q.type === "order" && orderRevealed && !isCorrect && <span> הסדר שמוצג למעלה הוא הסדר הנכון.</span>}
           </div>
         )}
@@ -356,7 +365,9 @@ function OrderQuestion({
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-black/10 dark:bg-white/10 text-xs font-bold">
                 {slot + 1}
               </span>
-              <span className="flex-1">{steps[stepIndex]}</span>
+              <span className="flex-1">
+                <ChemText>{steps[stepIndex]}</ChemText>
+              </span>
               {!answered && <span className="shrink-0 text-neutral-400">⠿</span>}
             </div>
           );

@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState, useCallback } from "react";
 import type { MatchingGame as MatchingGameType } from "@/content/types";
 import { shuffle } from "@/lib/shuffle";
 import { MoleculeSkeletal } from "@/components/MoleculeSkeletal";
+import { ChemText } from "@/components/ChemText";
 
 interface LineCoord {
   key: string;
@@ -127,7 +128,11 @@ export function MatchingGame({ game }: { game: MatchingGameType }) {
     <div className="space-y-3">
       <div>
         <div className="font-semibold">{game.title}</div>
-        {game.instructions && <div className="text-xs text-neutral-500 mt-1">{game.instructions}</div>}
+        {game.instructions && (
+          <div className="text-xs text-neutral-500 mt-1">
+            <ChemText>{game.instructions}</ChemText>
+          </div>
+        )}
       </div>
 
       {done ? (
@@ -183,7 +188,7 @@ export function MatchingGame({ game }: { game: MatchingGameType }) {
                     {pairs[pairIdx].leftSmiles ? (
                       <MoleculeSkeletal smiles={pairs[pairIdx].leftSmiles} size={64} className="bg-white rounded" />
                     ) : (
-                      pairs[pairIdx].left
+                      <ChemText>{pairs[pairIdx].left}</ChemText>
                     )}
                   </button>
                 );
@@ -204,7 +209,7 @@ export function MatchingGame({ game }: { game: MatchingGameType }) {
                         : "border-black/10 dark:border-white/10 hover:border-emerald-500"
                     }`}
                   >
-                    {pairs[pairIdx].right}
+                    <ChemText>{pairs[pairIdx].right}</ChemText>
                   </button>
                 );
               })}
