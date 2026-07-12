@@ -102,6 +102,9 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
       const viewer = viewerRef.current;
       const container = containerRef.current;
       if (!viewer || !container) return;
+      // same defensive clamp as the render-time `t` lookup below - i may briefly be stale
+      // from a just-replaced mechanism with fewer frames.
+      i = Math.min(i, mechanism.frames.length - 1);
       const frame = mechanism.frames[i];
       viewer.setFrame(i);
       if (fixedViewRef.current && !keepExploreView) viewer.setView(fixedViewRef.current);
@@ -161,7 +164,10 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, exploring, mechanism]);
 
-  const t = mechanism.frames[frameIndex].t;
+  // frameIndex may briefly point past the end of a just-switched-to mechanism with fewer
+  // frames (the reset-to-0 effect runs after this render, not before) - clamp defensively.
+  const safeFrameIndex = Math.min(frameIndex, mechanism.frames.length - 1);
+  const t = mechanism.frames[safeFrameIndex].t;
 
   return (
     <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900 overflow-hidden">

@@ -2,11 +2,27 @@ import type { Mechanism3DMeta } from "./schema";
 import { SN2_MECHANISM_3D } from "./sn2";
 import { E2_MECHANISM_3D } from "./e2";
 import { SN1_MECHANISM_3D } from "./sn1";
+import { E1_MECHANISM_3D } from "./e1";
+import { RADICAL_MECHANISM_3D } from "./radical";
+import { ADDITION_MECHANISM_3D } from "./addition";
+import { HYDROGENATION_MECHANISM_3D } from "./hydrogenation";
+import { CARBONYL_MECHANISM_3D } from "./carbonyl";
+import { CARBOXYLIC_MECHANISM_3D } from "./carboxylic";
+import { ALPHA_MECHANISM_3D } from "./alpha";
+import { ALCOHOL_E1_MECHANISM_3D } from "./alcohol-e1";
 
 export const MECHANISM_3D_REGISTRY: Record<string, Mechanism3DMeta> = {
   sn2: SN2_MECHANISM_3D,
   e2: E2_MECHANISM_3D,
   sn1: SN1_MECHANISM_3D,
+  e1: E1_MECHANISM_3D,
+  radical: RADICAL_MECHANISM_3D,
+  addition: ADDITION_MECHANISM_3D,
+  hydrogenation: HYDROGENATION_MECHANISM_3D,
+  carbonyl: CARBONYL_MECHANISM_3D,
+  carboxylic: CARBOXYLIC_MECHANISM_3D,
+  "alpha-carbon": ALPHA_MECHANISM_3D,
+  "alcohols-e1": ALCOHOL_E1_MECHANISM_3D,
 };
 
 export interface MechanismListEntry {
@@ -22,4 +38,9 @@ export const ALL_MECHANISMS_3D: MechanismListEntry[] = [
   { slug: "e1", title: "E1 - אלימינציה דו-שלבית" },
   { slug: "radical", title: "הלוגנציה רדיקלית - Propagation" },
   { slug: "addition", title: "סיפוח הידרוהלוגני לאלקן" },
+  { slug: "hydrogenation", title: "הידרוגנציה קטליטית" },
+  { slug: "carbonyl", title: "סיפוח נוקלאופילי לקרבוניל" },
+  { slug: "carboxylic", title: "תגובות נגזרות קרבוקסיליות" },
+  { slug: "alpha-carbon", title: "אנוליזציה בפחמן אלפא" },
+  { slug: "alcohols-e1", title: "התייבשות אלכוהול (E1)" },
 ];
