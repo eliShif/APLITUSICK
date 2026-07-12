@@ -24,6 +24,10 @@ export const CARBOXYLIC_MECHANISM_3D: Mechanism3DMeta = {
     { fromIndex: O, toIndex: C, color: "#111827", activeFrom: 0.5, activeTo: 0.8, style: "pair" },
     { fromIndex: C, toIndex: LG, color: "#b45309", activeFrom: 0.55, activeTo: 1, style: "pair" },
   ],
+  bondOrders: [
+    { a: C, b: O, order: 2, from: 0, to: 0.3 },
+    { a: C, b: O, order: 2, from: 0.58, to: 1 },
+  ],
   captions: [
     { from: 0, to: 0.08, text: "המגיבים: אציל כלוריד (קרבוניל שטוח) ונוקלאופיל מתקרב." },
     { from: 0.08, to: 0.42, text: "שלב 1 (תוספת): הנוקלאופיל תוקף את פחמן הקרבוניל - הפחמן הופך ל-sp³." },

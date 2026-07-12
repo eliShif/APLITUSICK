@@ -22,6 +22,7 @@ export const BROMONIUM_MECHANISM_3D: Mechanism3DMeta = {
     { fromIndex: BR1, toIndex: BR2, color: "#b45309", activeFrom: 0, activeTo: 0.45, style: "pair" },
     { fromIndex: BR2, toIndex: C2, color: "#b45309", activeFrom: 0.45, activeTo: 1, style: "pair" },
   ],
+  bondOrders: [{ a: C1, b: C2, order: 2, from: 0, to: 0.08 }],
   captions: [
     { from: 0, to: 0.08, text: "המגיבים: אתילן (π שטוח) ו-Br2 מתקרב." },
     { from: 0.08, to: 0.45, text: "אלקטרוני ה-π תוקפים Br אחד - נוצר קשר, ה-Br השני עוזב כברומיד חופשי (בפועל: יון ברומוניום מגושר)." },

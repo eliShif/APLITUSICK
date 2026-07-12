@@ -30,6 +30,7 @@ export const CARBONYL_MECHANISM_3D: Mechanism3DMeta = {
     { fromIndex: NU, toIndex: C, color: "#1d4ed8", activeFrom: 0, activeTo: 0.65, style: "pair" },
     { fromIndex: C, toIndex: O, color: "#111827", activeFrom: 0.35, activeTo: 1, style: "pair" },
   ],
+  bondOrders: [{ a: C, b: O, order: 2, from: 0, to: 0.55 }],
   captions: [
     { from: 0, to: 0.08, text: "המגיבים: פורמלדהיד (קרבוניל שטוח) ונוקלאופיל (כאן הידרוקסיד) מתקרב." },
     { from: 0.08, to: 0.55, text: "הנוקלאופיל תוקף את פחמן הקרבוניל - הפחמן מתחיל להשתטח לכיוון sp³." },

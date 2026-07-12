@@ -37,6 +37,21 @@ export interface Mechanism3DStepCaption {
   text: string;
 }
 
+/**
+ * חלון זמן שבו קשר בין שני אטומים מסוימים (לפי אינדקס ב-frame.atoms) מוצג ככפול/משולש
+ * (order 2/3) במקום בודד. הבדיקה האוטומטית של 3Dmol (מבוססת מרחק בלבד) תמיד יוצרת קשרים
+ * בודדים - זה overlay שדורס את order לאחר טעינת הפריים, לפריימים שבהם t בטווח. מחוץ לכל
+ * חלון - הקשר חוזר לבודד (ברירת המחדל האוטומטית). אותו זוג אטומים יכול להופיע בכמה חלונות
+ * (למשל C=O שנשבר ואז נוצר מחדש בתגובת נגזרת קרבוקסילית).
+ */
+export interface Mechanism3DBondOrder {
+  a: number;
+  b: number;
+  order: 2 | 3;
+  from: number;
+  to: number;
+}
+
 export interface Mechanism3DMeta {
   slug: string;
   title: string;
@@ -44,6 +59,7 @@ export interface Mechanism3DMeta {
   roles: Mechanism3DRole[];
   arrows: Mechanism3DArrow[];
   captions: Mechanism3DStepCaption[];
+  bondOrders?: Mechanism3DBondOrder[];
 }
 
 export function captionForT(captions: Mechanism3DStepCaption[], t: number): string {

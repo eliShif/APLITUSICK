@@ -31,6 +31,13 @@ export const ALDOL_MECHANISM_3D: Mechanism3DMeta = {
     { fromIndex: HA2, toIndex: CC2, color: "#111827", activeFrom: 0.78, activeTo: 1, style: "pair" },
     { fromIndex: CC2, toIndex: O2, color: "#b45309", activeFrom: 0.75, activeTo: 1, style: "pair" },
   ],
+  bondOrders: [
+    { a: CC1, b: O1, order: 2, from: 0, to: 0.1 },
+    { a: CA, b: CC1, order: 2, from: 0.1, to: 0.36 },
+    { a: CC1, b: O1, order: 2, from: 0.36, to: 1 },
+    { a: CC2, b: O2, order: 2, from: 0, to: 0.35 },
+    { a: CA, b: CC2, order: 2, from: 0.8, to: 1 },
+  ],
   captions: [
     { from: 0, to: 0.08, text: "שני שווי אצטלדהיד: מולקולה אחת תאבד Hα ותהפוך לאנולאט נוקלאופילי." },
     { from: 0.08, to: 0.35, text: "שלב 1: בסיס מסיר Hα - נוצר אנולאט (מיוצב בתהודה בין הפחמן לחמצן)." },

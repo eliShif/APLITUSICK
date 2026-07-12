@@ -32,8 +32,9 @@ export const E1_MECHANISM_3D: Mechanism3DMeta = {
   arrows: [
     { fromIndex: CA, toIndex: LG, color: "#b45309", activeFrom: 0, activeTo: 0.55, style: "pair" },
     { fromIndex: BASE, toIndex: H_BETA, color: "#1d4ed8", activeFrom: 0.5, activeTo: 0.85, style: "pair" },
-    { fromIndex: H_BETA, toIndex: CB, color: "#111827", activeFrom: 0.6, activeTo: 1, style: "pair" },
+    { fromIndex: H_BETA, toIndex: CA, color: "#111827", activeFrom: 0.6, activeTo: 1, style: "pair" },
   ],
+  bondOrders: [{ a: CA, b: CB, order: 2, from: 0.55, to: 1 }],
   captions: [
     { from: 0, to: 0.1, text: "המגיב: טרט-בוטיל ברומיד - פחמן מרכזי טטראהדרלי." },
     { from: 0.1, to: 0.48, text: "שלב 1 (איטי, קובע קצב): הקשר C-Br נשבר - נוצר קרבוקטיון." },

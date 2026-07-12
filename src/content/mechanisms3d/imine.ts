@@ -20,6 +20,10 @@ export const IMINE_MECHANISM_3D: Mechanism3DMeta = {
     { fromIndex: N, toIndex: C1, color: "#1d4ed8", activeFrom: 0, activeTo: 0.55, style: "pair" },
     { fromIndex: C1, toIndex: O, color: "#b91c1c", activeFrom: 0.3, activeTo: 0.75, style: "pair" },
   ],
+  bondOrders: [
+    { a: C1, b: O, order: 2, from: 0, to: 0.3 },
+    { a: C1, b: N, order: 2, from: 0.8, to: 1 },
+  ],
   captions: [
     { from: 0, to: 0.08, text: "המגיבים: אצטון (קרבוניל שטוח) ומתילאמין מתקרב." },
     { from: 0.08, to: 0.48, text: "האמין תוקף את פחמן הקרבוניל - נוצר תווך טטראהדרלי (קרבינולאמין, לאחר איזון פרוטונים שאינו מונפש כאן)." },

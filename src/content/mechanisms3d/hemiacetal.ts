@@ -22,6 +22,7 @@ export const HEMIACETAL_MECHANISM_3D: Mechanism3DMeta = {
     { fromIndex: C4, toIndex: O_CARB, color: "#111827", activeFrom: 0.35, activeTo: 0.75, style: "pair" },
     { fromIndex: O_CARB, toIndex: H3O, color: "#b91c1c", activeFrom: 0.6, activeTo: 1, style: "pair" },
   ],
+  bondOrders: [{ a: C4, b: O_CARB, order: 2, from: 0, to: 0.35 }],
   captions: [
     { from: 0, to: 0.08, text: "המגיב: 4-הידרוקסיבוטנאל - מולקולה אחת עם OH וקרבוניל. (גלוקוז עובר בדיוק אותו מנגנון, עם טבעת בת 6)." },
     { from: 0.08, to: 0.55, text: "שלב 1: החמצן ההידרוקסילי תוקף תוך-מולקולרית את פחמן הקרבוניל - נסגרת טבעת בת 5." },

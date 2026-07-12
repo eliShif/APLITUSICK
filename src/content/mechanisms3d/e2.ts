@@ -32,9 +32,10 @@ export const E2_MECHANISM_3D: Mechanism3DMeta = {
   ],
   arrows: [
     { fromIndex: BASE, toIndex: H_BETA, color: "#1d4ed8", activeFrom: 0, activeTo: 0.65, style: "pair" },
-    { fromIndex: H_BETA, toIndex: CB, color: "#111827", activeFrom: 0.15, activeTo: 0.75, style: "pair" },
+    { fromIndex: H_BETA, toIndex: CA, color: "#111827", activeFrom: 0.15, activeTo: 0.75, style: "pair" },
     { fromIndex: CA, toIndex: LG, color: "#b45309", activeFrom: 0.35, activeTo: 1, style: "pair" },
   ],
+  bondOrders: [{ a: CA, b: CB, order: 2, from: 0.5, to: 1 }],
   captions: [
     { from: 0, to: 0.08, text: "המגיבים: ברומואתאן במצב אנטי-פריפלנרי - Hβ ו-Br במישור אחד, בזווית 180°." },
     { from: 0.08, to: 0.42, text: "הידרוקסיד מתקרב ל-Hβ בעוד הקשר Cα-Br עדיין קיים - שלב מוקדם של המנגנון החד-שלבי." },

@@ -23,6 +23,10 @@ export const ACETAL_MECHANISM_3D: Mechanism3DMeta = {
     { fromIndex: C, toIndex: O_LEAVE, color: "#b91c1c", activeFrom: 0.28, activeTo: 0.62, style: "pair" },
     { fromIndex: NU2, toIndex: C, color: "#1d4ed8", activeFrom: 0.62, activeTo: 1, style: "pair" },
   ],
+  bondOrders: [
+    { a: C, b: O_LEAVE, order: 2, from: 0, to: 0.1 },
+    { a: C, b: NU1, order: 2, from: 0.35, to: 0.6 },
+  ],
   captions: [
     { from: 0, to: 0.06, text: "המגיבים: פורמלדהיד וכוהל ראשון (מתנול) מתקרב, בסביבה חומצית." },
     { from: 0.06, to: 0.33, text: "שלב 1: המתנול תוקף את פחמן הקרבוניל - נוצר המיאצטל (תווך טטראהדרלי)." },

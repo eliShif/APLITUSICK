@@ -8,6 +8,12 @@ interface ScreenPt {
   y: number;
 }
 
+interface GLAtomLike {
+  index: number;
+  bonds: number[];
+  bondOrder: number[];
+}
+
 interface GLViewerLike {
   addModelsAsFrames: (data: string, format: string) => void;
   setStyle: (sel: object, style: object) => void;
@@ -17,6 +23,40 @@ interface GLViewerLike {
   getView: () => number[];
   setView: (view: number[]) => void;
   modelToScreen: (coords: ScreenPt[]) => ScreenPt[];
+  selectedAtoms: (sel: object) => GLAtomLike[];
+}
+
+/**
+ * 3Dmol מזהה קשרים אוטומטית לפי מרחק בלבד (assignBonds) - כל קשר נוצר כבודד (order 1), גם
+ * קשרים כפולים/משולשים כימית. הפונקציה הזו דורסת את ה-order בפועל על אטומי הפריים הנוכחי,
+ * לפי windows שהוגדרו ב-mechanism.bondOrders (ראו schema.ts) - כך שקשר π שכימית קיים
+ * (למשל C=C באלקן, C=O בקרבוניל) נראה כפול בפועל, ולא מתבלבל עם קשר בודד רגיל.
+ */
+function applyBondOrders(viewer: GLViewerLike, mechanism: Mechanism3DMeta, t: number) {
+  const windows = mechanism.bondOrders;
+  if (!windows || windows.length === 0) return;
+  // מקבצים לפי זוג אטומים (לא מסודר) - כך שכמה windows על אותו קשר (למשל C=O שנשבר ואז
+  // נוצר מחדש) לא "יריבו" זה בזה: הסדר האפקטיבי הוא 1 אלא אם window פעיל כרגע עבור אותו זוג.
+  const pairs = new Map<string, { a: number; b: number; order: number }>();
+  for (const w of windows) {
+    const key = w.a < w.b ? `${w.a}-${w.b}` : `${w.b}-${w.a}`;
+    const active = t >= w.from && t <= w.to;
+    const existing = pairs.get(key);
+    if (!existing) pairs.set(key, { a: w.a, b: w.b, order: active ? w.order : 1 });
+    else if (active) existing.order = w.order;
+  }
+  for (const { a, b, order } of pairs.values()) {
+    const atomA = viewer.selectedAtoms({ index: a })[0];
+    const atomB = viewer.selectedAtoms({ index: b })[0];
+    if (atomA) {
+      const bi = atomA.bonds.indexOf(b);
+      if (bi !== -1) atomA.bondOrder[bi] = order;
+    }
+    if (atomB) {
+      const bi = atomB.bonds.indexOf(a);
+      if (bi !== -1) atomB.bondOrder[bi] = order;
+    }
+  }
 }
 
 function frameToXyzBlock(frame: Mechanism3DFrame, title: string): string {
@@ -85,7 +125,9 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
       }) as unknown as GLViewerLike;
       const allFrames = mechanism.frames.map((f) => frameToXyzBlock(f, mechanism.slug)).join("\n");
       viewer.addModelsAsFrames(allFrames, "xyz");
-      viewer.setStyle({}, { stick: { radius: 0.12 }, sphere: { scale: 0.28 } });
+      // doubleBondScaling גבוה מברירת המחדל (0.4) - כך שקשר כפול (ראו bondOrders בסכימה)
+      // נראה בבירור כשני מוטות מקבילים ונבדל מקשר בודד, לא רק מוט אחד עבה יותר.
+      viewer.setStyle({}, { stick: { radius: 0.12, doubleBondScaling: 0.9 }, sphere: { scale: 0.28 } });
       viewer.zoomTo();
       viewer.render();
       initialViewRef.current = viewer.getView();
@@ -146,6 +188,7 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
       if (!viewer) return;
       i = Math.min(i, mechanism.frames.length - 1);
       viewer.setFrame(i);
+      applyBondOrders(viewer, mechanism, mechanism.frames[i].t);
       viewer.render();
       updateOverlay(i);
     },

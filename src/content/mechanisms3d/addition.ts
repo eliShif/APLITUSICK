@@ -32,6 +32,7 @@ export const ADDITION_MECHANISM_3D: Mechanism3DMeta = {
     { fromIndex: H_NEW, toIndex: BR, color: "#b45309", activeFrom: 0, activeTo: 0.45, style: "pair" },
     { fromIndex: BR, toIndex: C2, color: "#b45309", activeFrom: 0.45, activeTo: 1, style: "pair" },
   ],
+  bondOrders: [{ a: C1, b: C2, order: 2, from: 0, to: 0.08 }],
   captions: [
     { from: 0, to: 0.08, text: "המגיבים: אתילן (אלקן שטוח) ו-H-Br מתקרב אל ענן ה-π." },
     { from: 0.08, to: 0.48, text: "אלקטרוני ה-π תוקפים את ה-H (אלקטרופיל) - נוצר קשר C-H חדש, C1 הופך ל-sp³." },

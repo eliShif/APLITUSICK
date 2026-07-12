@@ -23,6 +23,10 @@ export const ALPHA_MECHANISM_3D: Mechanism3DMeta = {
     { fromIndex: H_ALPHA, toIndex: CCARB, color: "#111827", activeFrom: 0.15, activeTo: 0.7, style: "pair" },
     { fromIndex: CCARB, toIndex: O, color: "#111827", activeFrom: 0.4, activeTo: 1, style: "pair" },
   ],
+  bondOrders: [
+    { a: CCARB, b: O, order: 2, from: 0, to: 0.4 },
+    { a: CCARB, b: CALPHA, order: 2, from: 0.55, to: 1 },
+  ],
   captions: [
     { from: 0, to: 0.08, text: "המגיבים: אצטלדהיד - Hα על הפחמן הסמוך לקרבוניל, בסיס מתקרב." },
     { from: 0.08, to: 0.55, text: "הבסיס מסיר Hα - האלקטרונים יוצרים קשר π חדש בין Cα לפחמן הקרבוניל." },
