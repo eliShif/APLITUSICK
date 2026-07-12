@@ -54,6 +54,7 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
   const rectRef = useRef<DOMRect | null>(null);
   const rafRef = useRef<number | null>(null);
   const playStartRef = useRef<number>(0);
+  const lastPtsRef = useRef<Map<number, ScreenPt> | null>(null);
 
   const [ready, setReady] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
@@ -74,6 +75,7 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
     setPlaying(false);
     initialViewRef.current = null;
     rectRef.current = null;
+    lastPtsRef.current = null;
 
     async function init() {
       const $3Dmol = await import("3dmol");
@@ -96,18 +98,16 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
     };
   }, [mechanism]);
 
-  const renderFrame = useCallback(
+  // מחשב מחדש את מיקומי ה-overlay (חצים/תוויות) לפי מצב המצלמה הנוכחי בפועל - בלי לגעת
+  // בפריים/רינדור של המולקולה עצמה. נקרא גם מתוך renderFrame (כשמחליפים פריים) וגם
+  // מלולאת ה"מעקב סיבוב" למטה (כשהמשתמש גורר בעכבר בלי לשנות פריים כלל).
+  const updateOverlay = useCallback(
     (i: number) => {
       const viewer = viewerRef.current;
       const container = containerRef.current;
       if (!viewer || !container) return;
-      // same defensive clamp as the render-time `t` lookup below - i may briefly be stale
-      // from a just-replaced mechanism with fewer frames.
       i = Math.min(i, mechanism.frames.length - 1);
       const frame = mechanism.frames[i];
-      viewer.setFrame(i);
-      viewer.render();
-
       if (!rectRef.current) rectRef.current = container.getBoundingClientRect();
       const rect = rectRef.current;
       const indices = trackedIndicesRef.current;
@@ -122,15 +122,54 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
       });
       const map = new Map<number, ScreenPt>();
       indices.forEach((idx, i) => map.set(idx, toLocal(screen[i])));
+
+      // מדלגים על עדכון state כשכלום לא זז (למשל בזמן שהמשתמש לא גורר) - כדי שהלולאה
+      // הרציפה למטה לא תגרום ל-re-render מיותר 60 פעם בשנייה כשהתצוגה במנוחה.
+      const prev = lastPtsRef.current;
+      const changed =
+        !prev ||
+        prev.size !== map.size ||
+        Array.from(map.entries()).some(([idx, p]) => {
+          const q = prev.get(idx);
+          return !q || Math.abs(q.x - p.x) > 0.4 || Math.abs(q.y - p.y) > 0.4;
+        });
+      if (!changed) return;
+      lastPtsRef.current = map;
       setScreenPts(map);
     },
     [mechanism]
+  );
+
+  const renderFrame = useCallback(
+    (i: number) => {
+      const viewer = viewerRef.current;
+      if (!viewer) return;
+      i = Math.min(i, mechanism.frames.length - 1);
+      viewer.setFrame(i);
+      viewer.render();
+      updateOverlay(i);
+    },
+    [mechanism, updateOverlay]
   );
 
   useEffect(() => {
     if (ready) renderFrame(frameIndex);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, frameIndex, renderFrame]);
+
+  // כשלא מנגנים, עוקבים ברקע אחרי סיבוב שהמשתמש עושה בעכבר/מגע (שלא עובר דרך React בכלל
+  // - 3Dmol מטפל בגרירה ישירות על ה-canvas) ומעדכנים את מיקום ה-overlay בהתאם, כך שהחצים
+  // והתוויות לא "יקפאו" במקום הישן אחרי שהאנימציה נגמרה/בזמן שהיא בהשהיה.
+  useEffect(() => {
+    if (!ready || playing) return;
+    let raf: number;
+    function loop() {
+      updateOverlay(frameIndex);
+      raf = requestAnimationFrame(loop);
+    }
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [ready, playing, frameIndex, updateOverlay]);
 
   useEffect(() => {
     if (!playing) return;
