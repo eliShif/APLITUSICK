@@ -42,14 +42,15 @@ const PLAYBACK_MS = 3200;
  * סימולטור מנגנון תלת-ממדי גנרי - מונע נתונים (Mechanism3DMeta), לשימוש חוזר בכל המנגנונים.
  * כל הפריימים נטענים פעם אחת כ-multi-frame model (viewer.addModelsAsFrames) ומוצגים דרך
  * viewer.setFrame(i) - זול בהרבה מ-clear+addModel בכל טיק, ומאפשר ניגון חלק בקצב אמיתי
- * (requestAnimationFrame לפי זמן שחלף, לא setInterval קבוע). המצלמה נעולה בזווית מתוכננת
- * בזמן ניגון ("מצב צפייה") כדי שחצים/תוויות 2D (מחושבים דרך viewer.modelToScreen) יישארו
- * מסונכרנים למיקום האטומים. "מצב חקירה" עוצר את הניגון ומאפשר סיבוב חופשי בעכבר, בלי overlay.
+ * (requestAnimationFrame לפי זמן שחלף, לא setInterval קבוע). המשתמש יכול לסובב את המצלמה
+ * חופשי בכל עת (גרירה בעכבר, ברירת המחדל של 3Dmol) - גם בזמן ניגון וגם כשעצור - בלי שהקוד
+ * "יילחם" בסיבוב ויאפס אותו: חצי/תוויות ה-2D מחושבים מחדש בכל פריים לפי המצלמה הנוכחית
+ * בפועל (viewer.modelToScreen), כך שהם נשארים מסונכרנים לאן שהמולקולה הסתובבה אליה.
  */
 export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<GLViewerLike | null>(null);
-  const fixedViewRef = useRef<number[] | null>(null);
+  const initialViewRef = useRef<number[] | null>(null);
   const rectRef = useRef<DOMRect | null>(null);
   const rafRef = useRef<number | null>(null);
   const playStartRef = useRef<number>(0);
@@ -57,7 +58,6 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
   const [ready, setReady] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [exploring, setExploring] = useState(false);
   const [screenPts, setScreenPts] = useState<Map<number, ScreenPt> | null>(null);
 
   // כל האטומים שצריך למקם על המסך: אלו שיש להם תווית (roles) וגם כל קצה חץ (arrows) -
@@ -72,8 +72,7 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
     setReady(false);
     setFrameIndex(0);
     setPlaying(false);
-    setExploring(false);
-    fixedViewRef.current = null;
+    initialViewRef.current = null;
     rectRef.current = null;
 
     async function init() {
@@ -87,7 +86,7 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
       viewer.setStyle({}, { stick: { radius: 0.12 }, sphere: { scale: 0.28 } });
       viewer.zoomTo();
       viewer.render();
-      fixedViewRef.current = viewer.getView();
+      initialViewRef.current = viewer.getView();
       viewerRef.current = viewer;
       if (!cancelled) setReady(true);
     }
@@ -98,7 +97,7 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
   }, [mechanism]);
 
   const renderFrame = useCallback(
-    (i: number, keepExploreView: boolean) => {
+    (i: number) => {
       const viewer = viewerRef.current;
       const container = containerRef.current;
       if (!viewer || !container) return;
@@ -107,13 +106,8 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
       i = Math.min(i, mechanism.frames.length - 1);
       const frame = mechanism.frames[i];
       viewer.setFrame(i);
-      if (fixedViewRef.current && !keepExploreView) viewer.setView(fixedViewRef.current);
       viewer.render();
 
-      if (keepExploreView) {
-        setScreenPts(null);
-        return;
-      }
       if (!rectRef.current) rectRef.current = container.getBoundingClientRect();
       const rect = rectRef.current;
       const indices = trackedIndicesRef.current;
@@ -134,12 +128,12 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
   );
 
   useEffect(() => {
-    if (ready) renderFrame(frameIndex, exploring);
+    if (ready) renderFrame(frameIndex);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, frameIndex, renderFrame, exploring]);
+  }, [ready, frameIndex, renderFrame]);
 
   useEffect(() => {
-    if (!playing || exploring) return;
+    if (!playing) return;
     rectRef.current = containerRef.current?.getBoundingClientRect() ?? null;
     const totalFrames = mechanism.frames.length;
     const startFrame = frameIndex;
@@ -162,7 +156,7 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing, exploring, mechanism]);
+  }, [playing, mechanism]);
 
   // frameIndex may briefly point past the end of a just-switched-to mechanism with fewer
   // frames (the reset-to-0 effect runs after this render, not before) - clamp defensively.
@@ -175,14 +169,12 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
         <div className="font-semibold">{mechanism.title}</div>
         <button
           onClick={() => {
-            setPlaying(false);
-            setExploring((v) => !v);
+            const viewer = viewerRef.current;
+            if (viewer && initialViewRef.current) viewer.setView(initialViewRef.current);
           }}
-          className={`rounded-full px-3 py-1 text-xs transition ${
-            exploring ? "bg-emerald-600 text-white" : "bg-black/5 dark:bg-white/10 hover:bg-black/10"
-          }`}
+          className="rounded-full px-3 py-1 text-xs transition bg-black/5 dark:bg-white/10 hover:bg-black/10"
         >
-          {exploring ? "חזרה למצב צפייה" : "🔄 מצב חקירה (סיבוב חופשי)"}
+          🔄 איפוס תצוגה
         </button>
       </div>
 
@@ -192,7 +184,10 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
             טוען מודל תלת-ממדי…
           </div>
         )}
-        {screenPts && !exploring && (
+        <div className="absolute bottom-2 right-2 rounded-full bg-black/50 text-white text-xs px-3 py-1 pointer-events-none">
+          גררו כדי לסובב
+        </div>
+        {screenPts && (
           <svg className="absolute inset-0 pointer-events-none z-10" width="100%" height="100%">
             <defs>
               <marker id="arrow-3d-pair" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -241,11 +236,6 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
             })}
           </svg>
         )}
-        {exploring && (
-          <div className="absolute bottom-2 right-2 rounded-full bg-black/60 text-white text-xs px-3 py-1">
-            גררו כדי לסובב · הסימולציה מושהית
-          </div>
-        )}
       </div>
 
       <div className="px-3 py-2 border-t border-black/10 dark:border-white/10">
@@ -254,7 +244,6 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
           <button
             onClick={() => {
               if (frameIndex >= mechanism.frames.length - 1) setFrameIndex(0);
-              setExploring(false);
               setPlaying((v) => !v);
             }}
             className="rounded-full px-3 py-1.5 text-sm bg-emerald-600 text-white hover:bg-emerald-700 transition shrink-0"
@@ -266,7 +255,6 @@ export function MechanismSimulator3D({ mechanism }: { mechanism: Mechanism3DMeta
             min={0}
             max={mechanism.frames.length - 1}
             value={frameIndex}
-            disabled={exploring}
             onChange={(e) => {
               setPlaying(false);
               setFrameIndex(Number(e.target.value));
