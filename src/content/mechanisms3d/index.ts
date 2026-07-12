@@ -12,6 +12,9 @@ import { ALPHA_MECHANISM_3D } from "./alpha";
 import { ALCOHOL_E1_MECHANISM_3D } from "./alcohol-e1";
 import { BROMONIUM_MECHANISM_3D } from "./bromonium";
 import { HEMIACETAL_MECHANISM_3D } from "./hemiacetal";
+import { IMINE_MECHANISM_3D } from "./imine";
+import { ACETAL_MECHANISM_3D } from "./acetal";
+import { ALDOL_MECHANISM_3D } from "./aldol";
 
 export const MECHANISM_3D_REGISTRY: Record<string, Mechanism3DMeta> = {
   sn2: SN2_MECHANISM_3D,
@@ -23,10 +26,13 @@ export const MECHANISM_3D_REGISTRY: Record<string, Mechanism3DMeta> = {
   bromonium: BROMONIUM_MECHANISM_3D,
   hydrogenation: HYDROGENATION_MECHANISM_3D,
   carbonyl: CARBONYL_MECHANISM_3D,
+  imine: IMINE_MECHANISM_3D,
+  acetal: ACETAL_MECHANISM_3D,
   carboxylic: CARBOXYLIC_MECHANISM_3D,
   "alpha-carbon": ALPHA_MECHANISM_3D,
   "alcohols-e1": ALCOHOL_E1_MECHANISM_3D,
   hemiacetal: HEMIACETAL_MECHANISM_3D,
+  aldol: ALDOL_MECHANISM_3D,
 };
 
 export interface MechanismListEntry {
@@ -45,8 +51,11 @@ export const ALL_MECHANISMS_3D: MechanismListEntry[] = [
   { slug: "bromonium", title: "סיפוח Br₂ לאלקן - סטריאוכימיית אנטי" },
   { slug: "hydrogenation", title: "הידרוגנציה קטליטית" },
   { slug: "carbonyl", title: "סיפוח נוקלאופילי לקרבוניל" },
+  { slug: "imine", title: "יצירת אימין (Schiff base)" },
+  { slug: "acetal", title: "יצירת אצטל - יון אוקסוקרבניום" },
   { slug: "carboxylic", title: "תגובות נגזרות קרבוקסיליות" },
   { slug: "alpha-carbon", title: "אנוליזציה בפחמן אלפא" },
   { slug: "alcohols-e1", title: "התייבשות אלכוהול (E1)" },
   { slug: "hemiacetal", title: "יצירת המיאצטל (מודל לגלוקוז)" },
+  { slug: "aldol", title: "עיבוי אלדולי" },
 ];
